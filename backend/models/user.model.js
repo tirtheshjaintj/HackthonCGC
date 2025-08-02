@@ -13,15 +13,7 @@ const userSchema = new Schema(
         message: "Username can only contain letters, numbers, and underscores.",
       },
     },
-    phone: {
-      type: String,
-      required: true,
-      unique: true,
-      validate: {
-        validator: (v) => /^\d{10}$/.test(v),
-        message: "Phone number must be exactly 10 digits.",
-      },
-    },
+ 
     email: {
       type: String,
       required: true,
@@ -44,7 +36,7 @@ const userSchema = new Schema(
         message: "OTP must be 6 digits",
       },
     },
-    google_id: {
+    gid: {
       type: String,
       validate: {
         validator: function (v) {
@@ -60,6 +52,10 @@ const userSchema = new Schema(
       default: "https://imgs.search.brave.com/8COzZiqruIekL2ihFd4kJK1wDWAQSgIrdmENvJLpNjM/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jZG4u/dmVjdG9yc3RvY2su/Y29tL2kvNTAwcC8w/Ni8zMi9zb2NpYWwt/bmV0d29yay1kZWZh/dWx0LXByb2ZpbGUt/cGljdHVyZS1hdmF0/YXItaWNvbi12ZWN0/b3ItNTcxMjA2MzIu/anBn"
     },
     isActive: {
+      type: Boolean,
+      default: true,
+    },
+    isAdmin: {
       type: Boolean,
       default: false,
     },
