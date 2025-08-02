@@ -4,13 +4,12 @@ import './index.css'
 import App from './App.jsx';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-// import Register from "./modules/auth/Register";
-// import VerifyOtp from "./modules/auth/VerifyOtp";
 import Login from "./modules/auth/Login";
 import AdminLogin from "./modules/adminAuth/Login";
 import HomePage from "./modules/home/pages/HomePage";
 import NotFoundPage from './modules/home/pages/NotFound.jsx';
 import CreateReport from './modules/home/pages/CreateReport.jsx';
+import SignUp from './modules/auth/SignUp.jsx';
 
 const router = createBrowserRouter([
   {
@@ -34,6 +33,9 @@ const router = createBrowserRouter([
         element: <CreateReport />
       },
       {
+        path: "/register",
+        element: <SignUp />
+      }, {
         path: "*",
         element: <NotFoundPage />
       }
