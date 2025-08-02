@@ -215,7 +215,11 @@ export const changeStatus = expressAsyncHandler(async (req, res) => {
     }
     report.status = status;
     await report.save();
-
-    res.status(200).json({ status: true, message: "Status updated successfully", data: report });
+    const reportsWithCounts = await addCountsToReports([report]);
+    res.status(200).json({ status: true, message: "Status updated successfully", data: reportsWithCounts[0] });
 });
 
+export const getCategories = expressAsyncHandler(async (req, res) => {
+    const categories = await Category.find({ active: true });
+    res.json({ status: true, message: "Status updated successfully", data: categories });
+});
