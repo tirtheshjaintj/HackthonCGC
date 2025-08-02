@@ -5,9 +5,9 @@ import { toast } from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
 // import sign from './sign.png'
 import Cookies from "universal-cookie";
- import Loader from "../../components/Loader";
+import Loader from "../../components/Loader";
 import PasswordInp from "../../components/Auths/PasswordInp";
- import useAuthStore from "../../store/authSlice/authSlice";
+import useAuthStore from "../../store/authSlice/authSlice";
 import axiosInstance from "../../axios/axiosConfig";
 const cookies = new Cookies(null, { path: "/" });
 
@@ -21,7 +21,7 @@ const SignUp = () => {
     email: "",
     password: "",
     name: "",
-   });
+  });
 
   // Route protection if log In is true
   useEffect(() => {
@@ -47,7 +47,7 @@ const SignUp = () => {
         ...data,
       });
 
-    //   console.log(res);
+      //   console.log(res);
       toast.success(res?.data?.message || "Success");
       cookies.set("authToken", res?.data?.token);
       setUser({
@@ -67,6 +67,7 @@ const SignUp = () => {
     toast.error("Something went wrong please try again");
     console.log(error);
   };
+
   const handleGoogleLoginSuccess = async (response) => {
     console.log(response);
     if (!response.credential) return console.log("Login Failed");
@@ -124,7 +125,7 @@ const SignUp = () => {
               placeholder="Email"
               required
             />
-     
+
             <PasswordInp
               onChange={handleChange}
               placeholder={"Password"}
