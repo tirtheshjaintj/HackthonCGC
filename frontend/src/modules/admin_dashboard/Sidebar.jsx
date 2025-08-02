@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import { GrLogout } from "react-icons/gr";
 import { FaBars } from "react-icons/fa";
 import { PiChalkboardTeacherFill, PiStudent } from "react-icons/pi";
@@ -6,31 +6,26 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { SiGoogleclassroom } from "react-icons/si";
 import Cookies from "universal-cookie";
 import { CiSettings } from "react-icons/ci";
+import { removeCookie } from "../../axios/cookieFunc";
 
 const listData = [
   {
-    name: "Reports",
+    name: "Dashboard",
     type: ["Admin"],
     icon: <PiChalkboardTeacherFill size={20} />,
-    link: "/user/dashboard/faculties",
+    link: "/user/admin",
   },
   {
-    name: "Users",
+    name: "All Reports",
     type: ["Admin"],
     icon: <SiGoogleclassroom size={20} />,
     link: "/user/dashboard/class",
   },
   {
-    name: "Events",
+    name: "Manage Users",
     type: ["Admin", "Convenor"],
     icon: <SiGoogleclassroom size={20} />,
     link: "/user/dashboard/events",
-  },
-  {
-    name: "Register for Event",
-    type: ["Class"],
-    icon: <PiStudent size={20} />,
-    link: "/user/dashboard/registerEvent",
   },
   {
     name: "Profile",
@@ -38,40 +33,49 @@ const listData = [
     icon: <CiSettings size={20} />,
     link: "/user/dashboard/profile",
   },
-  {
-    name: "All Registerations",
-    type: ["Admin", "Convenor"],
-    icon: <PiStudent size={20} />,
-    link: "/user/dashboard/allRegisterations",
-  },
 ];
 
 export default function Sidebar({ open, setOpen }) {
-  const [filteredListData, setFilteredListData] = useState(listData);
+  // const [filteredListData, setFilteredListData] = useState(listData);
   const location = useLocation();
-  const cookie = new Cookies();
   const navigate = useNavigate();
 
   const signOut = () => {
-    cookie.remove("user_token", { path: "/" });
-    localStorage.removeItem("user"); // assuming you stored user info here
-    navigate("/user/login");
+    removeCookie("authToken");
+    navigate("/login");
   };
 
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      const parsedUser = JSON.parse(storedUser);
-      const filteredData = listData.filter((item) =>
-        item.type.includes(parsedUser?.user_type)
-      );
-      setFilteredListData(filteredData);
-    }
-  }, []);
+  // useEffect(() => {
+  //   const storedUser = localStorage.getItem("user");
+  //   if (storedUser) {
+  //     const parsedUser = JSON.parse(storedUser);
+  //     const filteredData = listData.filter((item) =>
+  //       item.type.includes(parsedUser?.user_type)
+  //     );
+  //     setFilteredListData(filteredData);
+  //   }
+  // }, []);
 
   return (
     <div className="relative min-h-full text-stone-700">
       <div className="relative flex items-center gap-4 py-4 text-2xl font-bold border-b border-zinc-700 border-opacity-30">
+        {open ? (
+          <Link
+            to="/"
+            className="relative w-fit text-text-secondary-dark px-4 max-lg:flex items-center lg:w-60 text-2xl font-bold"
+          >
+            <span className="text-dark-primary">C</span>ivic{" "}
+            <span className="text-dark-primary">T</span>rack
+          </Link>
+        ) : (
+          <Link
+            to="/"
+            className="relative w-fit text-text-secondary-dark px-1.5 max-lg:flex items-center lg:w-60 text-2xl font-bold"
+          >
+            <span className="text-dark-primary">CT</span>
+          </Link>
+        )}
+
         <FaBars
           size={20}
           onClick={() => setOpen((prev) => !prev)}
@@ -80,15 +84,19 @@ export default function Sidebar({ open, setOpen }) {
       </div>
 
       <div className="flex flex-col gap-2 mt-5">
-        {filteredListData.map((item, index) => (
+        {listData.map((item, index) => (
           <Link
             to={item.link}
             key={index}
             onClick={() => setOpen(false)}
             className={`
-              ${item.link === location.pathname ? "bg-red-800 text-white" : ""}
+              ${
+                item.link === location.pathname
+                  ? "bg-dark-primary text-white"
+                  : ""
+              }
               rounded-md p-2 transition-all cursor-pointer
-              hover:bg-gradient-to-r hover:bg-red-900 hover:text-white
+              hover:bg-gradient-to-r hover:bg-dark-primary hover:text-white
               font-semibold flex items-center gap-3
               ${!open ? "w-fit" : "w-full"}
             `}

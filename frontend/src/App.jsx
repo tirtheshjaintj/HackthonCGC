@@ -8,13 +8,10 @@ import { getCookie, removeCookie } from "./axios/cookieFunc";
 import axiosInstance from "./axios/axiosConfig";
 import useAuthStore from "./store/authSlice/authSlice";
 import { Toaster } from "react-hot-toast";
-// import other components like Login, Home, etc. when available
-
-
 function App() {
   const navigate = useNavigate();
-  const { setUser, logout } = useAuthStore((state) => state);
-  
+  const { user,setUser, logout } = useAuthStore((state) => state);
+  // console.log(user)
   const fetchUserData = async () => {
     try {
       const token = getCookie("authToken");

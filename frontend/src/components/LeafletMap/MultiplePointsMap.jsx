@@ -93,7 +93,7 @@ const MultiplePointsMap = ({data = [
   }, [userPosition]);
 
   return (
-    <div className="w-full h-screen relative">
+    <div className="w-full h-screen relative z-20 ">
       {userPosition && (
         <MapContainer
           center={userPosition}
