@@ -1,16 +1,22 @@
+
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.jsx";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Login from "./modules/auth/Login";
- import HomePage from "./modules/home/pages/HomePage";
+// import AdminLogin from "./modules/adminAuth/Login";
+import HomePage from "./modules/home/pages/HomePage";
 import NotFoundPage from './modules/NotFound.jsx';
 import CreateReport from './modules/CreateReport.jsx';
 import SignUp from './modules/auth/SignUp.jsx';
 import ReportDetails from './modules/ReportDetails/ReportDetails.jsx'
 import MainDashboard from "./modules/admin_dashboard/MainDashboard.jsx/MainDashboard.jsx";
 import AdminDashboard from "./modules/admin_dashboard/AdminDashboard.jsx";
+import EditReport from './modules/EditReport.jsx';
+
+
 
 const router = createBrowserRouter([
   {
@@ -22,17 +28,17 @@ const router = createBrowserRouter([
         element: <HomePage />,
       },
       {
-        path:'report/:reportId',
-        element:<ReportDetails/>
+        path: 'report/:reportId',
+        element: <ReportDetails />
       },
       {
         path: "/login",
         element: <Login />,
       },
-      {
-        path: "/signup",
-        element: <SignUp />,
-      },
+      // {
+      //   path: "/admin/login",
+      //   element: <AdminLogin />,
+      // },
       {
         path: "/create",
         element: <CreateReport />,
@@ -42,6 +48,16 @@ const router = createBrowserRouter([
         element: <SignUp />,
       },
       {
+        path: "/edit/:report_id",
+        element: <EditReport />
+      },
+      {
+        path: "/signup",
+        element: <SignUp />
+      }, {
+        path: '/report/:reportId',
+        element: <ReportDetails />
+      }, {
         path: "*",
         element: <NotFoundPage />,
       },
@@ -64,9 +80,11 @@ const router = createBrowserRouter([
 createRoot(document.getElementById("root")).render(
   <RouterProvider router={router}>
     <GoogleOAuthProvider clientId={import.meta.VITE_GOOGLE_ID}>
+
       <App />
-    </GoogleOAuthProvider>
-  </RouterProvider>
+    </RouterProvider>
+  </GoogleOAuthProvider>
+
 );
 
 if ("serviceWorker" in navigator) {

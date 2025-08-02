@@ -7,6 +7,25 @@ import axiosInstance from "../../axios/axiosConfig";
 const ReportDetails = () => {
   const { reportId } = useParams();
 
+<<<<<<< HEAD
+  const fetchLogs = async () => {
+    try {
+      const response = await axiosInstance.get('/report/logs/' + reportId);
+      console.log({ response })
+    } catch (error) {
+      console.log("error :", error);
+    }
+  }
+
+  const fetchReport = async () => {
+    try {
+      const response = await axiosInstance.get('/report/id/' + reportId);
+      console.log({ response });
+    } catch (error) {
+      console.log("error : ", error);
+    }
+  }
+=======
   const [description, setDescription] = useState("");
   const [latitude, setLatitude] = useState(null);
   const [longitude, setLongitude] = useState(null);
@@ -40,6 +59,7 @@ const ReportDetails = () => {
       console.log("error:", error);
     }
   };
+>>>>>>> c6b107eaeba7967acdf4625082735a6d3addba17
 
   useEffect(() => {
     if (reportId) {
@@ -50,9 +70,19 @@ const ReportDetails = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 text-[#272727]">
+<<<<<<< HEAD
+      {/* Navbar */}
+=======
+>>>>>>> c6b107eaeba7967acdf4625082735a6d3addba17
       <NavBar />
 
       <div className="max-w-6xl mx-auto p-4 space-y-6">
+<<<<<<< HEAD
+        {/* Map Placeholder */}
+        <div className="w-full overflow-hidden h-64 bg-gray-300 rounded-2xl shadow-inner flex items-center justify-center text-gray-500 text-lg">
+
+          <SinglePointMap />
+=======
         {/* Map */}
         <div className="w-full overflow-hidden h-64 bg-gray-300 rounded-2xl shadow-inner">
           {latitude && longitude ? (
@@ -62,6 +92,7 @@ const ReportDetails = () => {
               Loading Map...
             </div>
           )}
+>>>>>>> c6b107eaeba7967acdf4625082735a6d3addba17
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

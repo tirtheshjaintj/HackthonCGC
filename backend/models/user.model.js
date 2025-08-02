@@ -13,7 +13,7 @@ const userSchema = new Schema(
         message: "Username can only contain letters, numbers, and underscores.",
       },
     },
- 
+
     email: {
       type: String,
       required: true,

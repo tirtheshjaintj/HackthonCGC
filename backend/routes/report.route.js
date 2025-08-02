@@ -27,11 +27,12 @@ reportRouter.post("/nearby", getReports);
 reportRouter.get("/categories", getCategories);
 reportRouter.get("/my", authcheck, myReports);
 reportRouter.get("/id/:reportId", getReportById);
-
+reportRouter.get("/auth/id/:reportId", authcheck, getReportById);
+reportRouter.delete("/delete/:reportId", authcheck, deleteReport);
+reportRouter.delete("/image/:imageId", authcheck, deleteImage);
 //Admin Ones
 reportRouter.get("/all", authcheckAdmin, allReports);
 reportRouter.post("/status/:reportId", authcheckAdmin, changeStatus);
-
 reportRouter.get('/logs/:reportId', getLogs);
 
 export default reportRouter;

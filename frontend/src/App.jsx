@@ -8,7 +8,6 @@ import { getCookie, removeCookie } from "./axios/cookieFunc";
 import axiosInstance from "./axios/axiosConfig";
 import useAuthStore from "./store/authSlice/authSlice";
 import { Toaster } from "react-hot-toast";
- 
 function App() {
   const navigate = useNavigate();
   const { user,setUser, logout } = useAuthStore((state) => state);
