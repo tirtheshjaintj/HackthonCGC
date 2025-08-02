@@ -43,50 +43,50 @@ export const addCountsToReports = async (reports) => {
 
 
 export const calculateDistanceKm = (lat1, lon1, lat2, lon2) => {
-  const toRad = (val) => (val * Math.PI) / 180;
-  const R = 6371; // Radius of Earth in KM
+    const toRad = (val) => (val * Math.PI) / 180;
+    const R = 6371; // Radius of Earth in KM
 
-  const dLat = toRad(lat2 - lat1);
-  const dLon = toRad(lon2 - lon1);
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
 
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(toRad(lat1)) *
-      Math.cos(toRad(lat2)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(toRad(lat1)) *
+        Math.cos(toRad(lat2)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
 
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c; // Distance in KM
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c; // Distance in KM
 };
 
 export const createReport = expressAsyncHandler(async (req, res) => {
-  const {
-    description,
-    anonymous = false,
-    latitude,
-    longitude,
-    category_id,
-  } = req.body;
-  const userId = req.user?._id || req.body.user_id; // adapt for auth
+    const {
+        description,
+        anonymous = false,
+        latitude,
+        longitude,
+        category_id,
+    } = req.body;
+    const userId = req.user?._id || req.body.user_id; // adapt for auth
 
-  // Ensure at least 1 image and max 10
-  // if (!req.files || req.files.length === 0) {
-  //     return res.status(400).json({ status: false, message: "At least one image is required" });
-  // }
+    // Ensure at least 1 image and max 10
+    // if (!req.files || req.files.length === 0) {
+    //     return res.status(400).json({ status: false, message: "At least one image is required" });
+    // }
 
-  // if (req.files.length > 10) {
-  //     return res.status(400).json({ status: false, message: "Maximum 10 images allowed" });
-  // }
+    // if (req.files.length > 10) {
+    //     return res.status(400).json({ status: false, message: "Maximum 10 images allowed" });
+    // }
 
-  // Create image documents
-  // const imageDocs = await Promise.all(
-  //     req.files.map(async (file) => {
-  //         return await Image.create({
-  //             report_id: null, // will link after report is created
-  //             image_url: file.path, // or file.location if using S3
-  //         });
-  //     })
+    // Create image documents
+    // const imageDocs = await Promise.all(
+    //     req.files.map(async (file) => {
+    //         return await Image.create({
+    //             report_id: null, // will link after report is created
+    //             image_url: file.path, // or file.location if using S3
+    //         });
+    //     })
 
     // Ensure at least 1 image and max 10
     if (!req.files || req.files.length === 0) {
@@ -107,21 +107,21 @@ export const createReport = expressAsyncHandler(async (req, res) => {
         })
     );
 
-  // Create the report with image IDs
-  const report = await Report.create({
-    user_id: userId,
-    description,
-    category_id,
-    anonymous: anonymous || false,
-    latitude,
-    longitude,
-    // images: imageDocs.map((img) => img._id),
-  });
+    // Create the report with image IDs
+    const report = await Report.create({
+        user_id: userId,
+        description,
+        category_id,
+        anonymous: anonymous || false,
+        latitude,
+        longitude,
+        // images: imageDocs.map((img) => img._id),
+    });
 
-  const user = userModel.findById(userId);
-  if (!user) {
-    throw new AppError("User not found", 404);
-  }
+    const user = userModel.findById(userId);
+    if (!user) {
+        throw new AppError("User not found", 404);
+    }
     // Update images with report_id reference
     await Promise.all(
         imageDocs.map((img) => {
@@ -130,15 +130,15 @@ export const createReport = expressAsyncHandler(async (req, res) => {
         })
     );
 
-  const history = await HistoryLogs.create({
-    report_id: report._id,
-    action: `Report created by ${user.name}`,
-  })
+    const history = await HistoryLogs.create({
+        report_id: report._id,
+        action: `Report created by ${user.name}`,
+    })
 
-  await sendEmail(
-    "New Report Created",
-    user.email,
-    `Hello ${user.name || ""},
+    await sendEmail(
+        "New Report Created",
+        user.email,
+        `Hello ${user.name || ""},
 
 A new report has been successfully submitted on CivicTrack.
 
@@ -148,20 +148,20 @@ Report Details:
 Thank you for helping us keep our community informed.
 
 - CivicTrack Team`
-  );
-  // Update images with report_id reference
-  // await Promise.all(
-  //     imageDocs.map((img) => {
-  //         img.report_id = report._id;
-  //         return img.save();
-  //     })
-  // );
+    );
+    // Update images with report_id reference
+    // await Promise.all(
+    //     imageDocs.map((img) => {
+    //         img.report_id = report._id;
+    //         return img.save();
+    //     })
+    // );
 
-  res.status(201).json({
-    status: true,
-    message: "Report created successfully",
-    data: report,
-  });
+    res.status(201).json({
+        status: true,
+        message: "Report created successfully",
+        data: report,
+    });
 });
 
 
@@ -264,24 +264,20 @@ export const allReports = expressAsyncHandler(async (req, res) => {
 });
 
 export const changeStatus = expressAsyncHandler(async (req, res) => {
-  const { reportId } = req.params;
-  const { status } = req.body;
-  const report = await Report.findById(reportId);
-  if (!report)
-    return res.status(404).json({ status: false, message: "Report not found" });
-  if (status <= report.status) {
-    return res
-      .status(400)
-      .json({
-        status: false,
-        message: "New status must be greater than current status",
-      });
-  }
-  report.status = status;
-  await report.save();
+    const { reportId } = req.params;
+    const { status } = req.body;
+    const report = await Report.findById(reportId);
+    if (!report) return res.status(404).json({ status: false, message: "Report not found" });
+    if (status <= report.status) {
+        return res.status(400).json({ status: false, message: "New status must be greater than current status" });
+    }
+    report.status = status;
+    await report.save();
 
-  const user = await userModel.findById(report.user_id);
+    res.status(200).json({ status: true, message: "Status updated successfully", data: report });
+});
 
+<<<<<<< HEAD
   
   const history = await HistoryLogs.create({
     report_id: report._id,
@@ -325,3 +321,5 @@ export const getLogs = expressAsyncHandler(async (req, res) => {
   const logs = await HistoryLogs.find({ report_id: reportId }).sort({ createdAt: -1 });
   res.status(200).json({ status: true, data: logs });
 });
+=======
+>>>>>>> e3edec3ff9a1bf9a734f0c1e495dc22a2306c880

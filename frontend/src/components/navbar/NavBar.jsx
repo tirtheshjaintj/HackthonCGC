@@ -42,7 +42,7 @@ export default function NavBar() {
 
       {/* Logo */}
       <Link
-        to="/home"
+        to="/"
         className="relative w-fit text-text-secondary-dark max-lg:flex items-center lg:w-60 text-2xl font-bold"
       >
         <span className="text-dark-primary">C</span>ivic{" "}
@@ -91,10 +91,7 @@ export default function NavBar() {
           </div>
         ) : (
           <div className="max-lg:hidden">
-            <button className="flex items-center bg-dark-primary border rounded-2xl text-white px-4 py-1.5 cursor-pointer gap-2 hover:opacity-80">
-              <LogIn size={20} strokeWidth={1.5} />
-              <p className="font-semibold">Log In</p>
-            </button>
+
             <button className="flex items-center bg-dark-primary border rounded-2xl text-white px-4 py-1.5 cursor-pointer gap-2 hover:opacity-80">
               <LogIn size={20} strokeWidth={1.5} />
               <p className="font-semibold">Raise New Issue</p>
