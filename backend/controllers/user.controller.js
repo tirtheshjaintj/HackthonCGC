@@ -140,9 +140,9 @@ export const loginUser = asynchandler(async (req, res) => {
   if (!email || !password)
     return res.status(400).json({ message: "All Fields are required" });
   const finduser = await User.findOne({ email: email });
+  console.log(finduser);
   if (!finduser)
     return res.status(400).json({ message: "Account does not exist" });
-
   const match = await finduser.isPasswordCorrect(password);
 
   if (!match) return res.status(401).json({ message: "Invalid credentials" });
@@ -241,7 +241,7 @@ export const verifyUserToken = asynchandler(async (req, res) => {
       res.status(401).json({ message: "Invalid token" });
     }
 
-    res.status(200).json({ user: user , token: token});
+    res.status(200).json({ user: user, token: token });
   } catch (error) {
     res.status(500).json({ message: "Invalid access token" });
   }

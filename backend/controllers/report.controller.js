@@ -67,7 +67,7 @@ export const createReport = expressAsyncHandler(async (req, res) => {
         longitude,
         category_id,
     } = req.body;
-    const userId = req.user?._id || req.body.user_id; // adapt for auth
+    const userId = req.user?._id; // adapt for auth
 
     // Ensure at least 1 image and max 10
     if (!req.files || req.files.length === 0) {
@@ -160,14 +160,14 @@ export const getReportById = expressAsyncHandler(async (req, res) => {
 
 export const editReport = expressAsyncHandler(async (req, res) => {
     const { reportId } = req.params;
-    const { description, category_id } = req.body;
+    const { description, category_id, anonymous } = req.body;
     const report = await Report.findOne({ _id: reportId, user_id: req.user?._id });
     if (!report) throw new AppError("Report not found", 404);
 
     // Update fields if provided
     if (description) report.description = description;
     if (category_id) report.category_id = category_id;
-
+    report.anonymous = anonymous;
     /** -------------------
      * Handle image updates
      * -------------------*/
@@ -213,6 +213,66 @@ export const editReport = expressAsyncHandler(async (req, res) => {
     });
 });
 
+export const deleteReport = expressAsyncHandler(async (req, res) => {
+    const { reportId } = req.params;
+    const userId = req.user?._id;
+
+    // Find the report
+    const report = await Report.findOne({ _id: reportId, user_id: userId });
+    if (!report) {
+        throw new AppError("Report not found or unauthorized", 404);
+    }
+
+    // Delete associated images
+    await Image.deleteMany({ report_id: report._id });
+
+    // Delete history logs
+    await HistoryLogs.deleteMany({ report_id: report._id });
+
+    // Delete the report
+    await report.deleteOne();
+
+    res.status(200).json({
+        status: true,
+        message: "Report deleted successfully",
+    });
+});
+
+export const deleteImage = expressAsyncHandler(async (req, res) => {
+    const { imageId } = req.params;
+    const userId = req.user?._id;
+
+    // Find image
+    const image = await Image.findById(imageId);
+    if (!image) {
+        throw new AppError("Image not found", 404);
+    }
+
+    const report = await Report.findById(image.report_id);
+    if (!report) {
+        throw new AppError("Associated report not found", 404);
+    }
+
+    // Ensure the user owns the report
+    if (report.user_id.toString() !== userId.toString()) {
+        throw new AppError("Unauthorized", 403);
+    }
+
+    // Remove imageId from report's images array (if stored)
+    report.images = report.images?.filter((imgId) => imgId.toString() !== imageId);
+    await report.save();
+
+    // Optionally delete from Cloudinary (if needed)
+    // await deleteFromCloud(image.image_url);
+
+    // Delete image document
+    await image.deleteOne();
+
+    res.status(200).json({
+        status: true,
+        message: "Image deleted successfully",
+    });
+});
 
 
 export const getReports = expressAsyncHandler(async (req, res) => {
@@ -229,7 +289,7 @@ export const getReports = expressAsyncHandler(async (req, res) => {
 });
 
 export const myReports = expressAsyncHandler(async (req, res) => {
-    const userId = req.user?._id || req.body.user_id;
+    const userId = req.user?._id;
     const reports = await Report.find({ user_id: userId })
         .populate("images")
         .populate("category_id")

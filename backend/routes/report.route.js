@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { allReports, changeStatus, createReport, editReport, getCategories, getReportById, getReports, myReports } from "../controllers/report.controller.js";
+import { allReports, changeStatus, createReport, deleteImage, deleteReport, editReport, getCategories, getLogs, getReportById, getReports, myReports } from "../controllers/report.controller.js";
 
 import { createReportValidator } from "../validators/report.validator.js";
 import validate from "../middlewares/validate.js";
@@ -22,11 +22,12 @@ reportRouter.post("/nearby", getReports);
 reportRouter.get("/categories", getCategories);
 reportRouter.get("/my", authcheck, myReports);
 reportRouter.get("/id/:reportId", getReportById);
-
+reportRouter.get("/auth/id/:reportId", authcheck, getReportById);
+reportRouter.delete("/delete/:reportId", authcheck, deleteReport);
+reportRouter.delete("/image/:imageId", authcheck, deleteImage);
 //Admin Ones
 reportRouter.get("/all", authcheckAdmin, allReports);
 reportRouter.post("/status/:reportId", authcheckAdmin, changeStatus);
-
 reportRouter.get('/logs/:reportId', getLogs);
 
 export default reportRouter;
