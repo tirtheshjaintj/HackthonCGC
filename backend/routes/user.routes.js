@@ -4,6 +4,7 @@ import {
   verifyOtp,
   login,
   googleSignIn,
+  getAllUsers,
 } from "../controllers/user.controller.js";
 
 const router = express.Router();
@@ -19,5 +20,7 @@ router.post("/login", login);
 
 // Google Sign-In
 router.post("/google-signin", googleSignIn);
+
+router.get('/all' , getAllUsers)
 
 export default router;

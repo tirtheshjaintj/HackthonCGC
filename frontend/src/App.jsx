@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Register from './modules/auth/Register';
 import VerifyOtp from './modules/auth/VerifyOtp';
 import Login from './modules/auth/Login';
+import AdminLogin from './modules/adminAuth/Login';
 // import other components like Login, Home, etc. when available
 
 function App() {
@@ -13,6 +14,9 @@ function App() {
 
         {/* Example routes */}
         <Route path="/login" element={<Login />} />
+        
+        <Route path="/admin/login" element={<AdminLogin />} />
+
         {/* <Route path="/" element={<Home />} /> */}
       </Routes>
     </Router>
