@@ -4,6 +4,8 @@ import { FaImage, FaTimes } from "react-icons/fa";
 import toast from "react-hot-toast";
 import usePageSetup from "../hooks/UsePageSetup";
 import axiosInstance from "../axios/axiosConfig";
+import NavBar from "../components/navbar/NavBar";
+import { useNavigate } from "react-router-dom";
 
 function CreateReport() {
     usePageSetup("Create New Report");
@@ -13,7 +15,7 @@ function CreateReport() {
         anonymous: false,
         category: "",
     });
-
+    const navigate = useNavigate();
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(false);
     const [imageFiles, setImageFiles] = useState([]);
@@ -111,6 +113,7 @@ function CreateReport() {
                 category: "",
             });
             setImageFiles([]);
+            navigate("/my-reports");
         } catch (err) {
             console.log(err);
             toast.error("Failed to submit the report.");
@@ -154,112 +157,112 @@ function CreateReport() {
 
 
     return (
-        <motion.div
-            className="max-w-4xl mx-auto p-6 bg-white dark:bg-gray-900 shadow-lg rounded-2xl mt-8 overflow-hidden"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-        >
-            <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">
-                Create New Report
-            </h2>
-
-            <form onSubmit={handleSubmit} className="space-y-5">
-
-
-                {/* Description */}
-                <textarea
-                    name="description"
-                    value={reportDetails.description}
-                    onChange={handleChange}
-                    placeholder="Describe your report (min 5 characters)"
-                    rows={4}
-                    className="w-full p-3 rounded-lg border bg-white dark:bg-gray-800 text-black dark:text-white"
-                />
-
-                {/* Categories */}
-                <select
-                    name="category"
-                    value={reportDetails.category}
-                    onChange={handleChange}
-                    className="w-full p-3 rounded-lg border bg-white dark:bg-gray-800 text-black dark:text-white"
-                >
-                    <option value="">Select Category</option>
-                    {categories.map((cat, idx) => (
-                        <option key={idx} value={cat._id}>
-                            {cat.name} ({cat.description})
-                        </option>
-                    ))}
-                </select>
-                {/* Anonymous */}
-                <div className="flex items-center gap-2">
-                    <input
-                        type="checkbox"
-                        name="anonymous"
-                        id="anonymous"
-                        checked={reportDetails.anonymous}
+        <>
+            <NavBar />
+            <motion.div
+                className="max-w-4xl mx-auto p-6 bg-white dark:bg-gray-900 shadow-lg rounded-2xl mt-8 overflow-hidden"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+            >
+                <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">
+                    Create New Report
+                </h2>
+                <form onSubmit={handleSubmit} className="space-y-5">
+                    {/* Description */}
+                    <textarea
+                        name="description"
+                        value={reportDetails.description}
                         onChange={handleChange}
-                        className="w-5 h-5"
+                        placeholder="Describe your report (min 5 characters)"
+                        rows={4}
+                        className="w-full p-3 rounded-lg border bg-white dark:bg-gray-800 text-black dark:text-white"
                     />
-                    <label htmlFor="anonymous" className="text-gray-700 dark:text-gray-300">
-                        Submit Anonymously
-                    </label>
-                </div>
 
-                {/* Images */}
-                <div>
-                    <label className="block mb-2 text-gray-700 dark:text-gray-300">
-                        Upload Images (Max 10)
-                    </label>
-                    <input
-                        type="file"
-                        onChange={handleImagesChange}
-                        accept="image/*"
-                        multiple
-                        hidden
-                        id="reportImages"
-                    />
-                    <div className="grid grid-cols-4 gap-2">
-                        {/* Upload Trigger */}
-                        <label
-                            htmlFor="reportImages"
-                            className="flex justify-center items-center border border-dashed border-gray-400 rounded-md aspect-square cursor-pointer"
-                        >
-                            <FaImage className="text-4xl text-gray-500" />
-                        </label>
-
-                        {/* Image Previews */}
-                        {imagePreviews.map((preview, index) => (
-                            <div
-                                key={index}
-                                className="relative w-full aspect-square overflow-hidden rounded-md"
-                            >
-                                <img
-                                    src={preview}
-                                    alt={`preview-${index}`}
-                                    className="object-cover w-full h-full"
-                                />
-                                <div
-                                    onClick={() => removeImage(index)}
-                                    className="absolute top-1 right-1 bg-black/70 p-1 rounded-full cursor-pointer text-white z-10"
-                                >
-                                    <FaTimes size={12} />
-                                </div>
-                            </div>
+                    {/* Categories */}
+                    <select
+                        name="category"
+                        value={reportDetails.category}
+                        onChange={handleChange}
+                        className="w-full p-3 rounded-lg border bg-white dark:bg-gray-800 text-black dark:text-white"
+                    >
+                        <option value="">Select Category</option>
+                        {categories.map((cat, idx) => (
+                            <option key={idx} value={cat._id}>
+                                {cat.name} ({cat.description})
+                            </option>
                         ))}
+                    </select>
+                    {/* Anonymous */}
+                    <div className="flex items-center gap-2">
+                        <input
+                            type="checkbox"
+                            name="anonymous"
+                            id="anonymous"
+                            checked={reportDetails.anonymous}
+                            onChange={handleChange}
+                            className="w-5 h-5"
+                        />
+                        <label htmlFor="anonymous" className="text-gray-700 dark:text-gray-300">
+                            Submit Anonymously
+                        </label>
                     </div>
-                </div>
 
-                {/* Submit */}
-                <button
-                    type="submit"
-                    disabled={!isLocationReady || loading}
-                    className="px-6 flex gap-2 py-3 float-right bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold"
-                >
-                    {loading ? <div className="spinner" ></div> : "Submit Report"}
-                </button>
-            </form>
-        </motion.div>
+                    {/* Images */}
+                    <div>
+                        <label className="block mb-2 text-gray-700 dark:text-gray-300">
+                            Upload Images (Max 10)
+                        </label>
+                        <input
+                            type="file"
+                            onChange={handleImagesChange}
+                            accept="image/*"
+                            multiple
+                            hidden
+                            id="reportImages"
+                        />
+                        <div className="grid grid-cols-4 gap-2">
+                            {/* Upload Trigger */}
+                            <label
+                                htmlFor="reportImages"
+                                className="flex justify-center items-center border border-dashed border-gray-400 rounded-md aspect-square cursor-pointer"
+                            >
+                                <FaImage className="text-4xl text-gray-500" />
+                            </label>
+
+                            {/* Image Previews */}
+                            {imagePreviews.map((preview, index) => (
+                                <div
+                                    key={index}
+                                    className="relative w-full aspect-square overflow-hidden rounded-md"
+                                >
+                                    <img
+                                        src={preview}
+                                        alt={`preview-${index}`}
+                                        className="object-cover w-full h-full"
+                                    />
+                                    <div
+                                        onClick={() => removeImage(index)}
+                                        className="absolute top-1 right-1 bg-black/70 p-1 rounded-full cursor-pointer text-white z-10"
+                                    >
+                                        <FaTimes size={12} />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Submit */}
+                    <button
+                        type="submit"
+                        disabled={!isLocationReady || loading}
+                        className="px-6 flex gap-2 py-3 float-right bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold"
+                    >
+                        {loading ? <div className="spinner" ></div> : "Submit Report"}
+                    </button>
+                </form>
+            </motion.div>
+        </>
     );
 }
 

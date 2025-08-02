@@ -5,38 +5,38 @@ import { useParams } from "react-router-dom";
 import axiosInstance from "../../axios/axiosConfig";
 
 const ReportDetails = () => {
-    const {reportId} = useParams();
+  const { reportId } = useParams();
 
-    const fetchLogs = async()=>{
-        try {
-            const response = await axiosInstance.get('/report/logs/' + reportId);
-            console.log({response})
-        } catch (error) {
-            console.log("error :" , error);
-        }
+  const fetchLogs = async () => {
+    try {
+      const response = await axiosInstance.get('/report/logs/' + reportId);
+      console.log({ response })
+    } catch (error) {
+      console.log("error :", error);
     }
+  }
 
-    const fetchReport = async()=>{
-        try {
-            const response = await axiosInstance.get('/report/id/' + reportId);
-            console.log({response});
-        } catch (error) {
-            console.log("error : " , error);
-        }
+  const fetchReport = async () => {
+    try {
+      const response = await axiosInstance.get('/report/id/' + reportId);
+      console.log({ response });
+    } catch (error) {
+      console.log("error : ", error);
     }
+  }
 
 
   return (
     <div className="min-h-screen bg-gray-50 text-[#272727]">
       {/* Navbar */}
-      <NavBar/>
+      <NavBar />
 
       {/* Main Container */}
       <div className="max-w-6xl mx-auto p-4 space-y-6">
         {/* Map Placeholder */}
         <div className="w-full overflow-hidden h-64 bg-gray-300 rounded-2xl shadow-inner flex items-center justify-center text-gray-500 text-lg">
-          
-          <SinglePointMap/>
+
+          <SinglePointMap />
         </div>
 
         {/* Content Grid */}

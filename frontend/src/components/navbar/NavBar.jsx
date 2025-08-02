@@ -25,11 +25,10 @@ export default function NavBar() {
 
   return (
     <header
-      className={`h-16  py-4 px-4 xl:px-[90px] lg:px-15 md:px-10 flex items-center justify-between sticky top-0 z-50 w-full transition-shadow duration-300 ${
-        isScrolled
-          ? "shadow-md bg-white/40 backdrop-blur-xl"
-          : "bg-white shadow"
-      }`}
+      className={`h-16 py-4 px-4 xl:px-[90px] lg:px-15 md:px-10 flex items-center justify-between sticky top-0 z-50 w-full transition-shadow duration-300 ${isScrolled
+        ? "shadow-md bg-white/40 backdrop-blur-xl"
+        : "bg-white shadow"
+        }`}
     >
       {/* Menu icon (mobile) */}
       <div className="flex items-center max-sm:w-14">
@@ -69,7 +68,7 @@ export default function NavBar() {
             className="max-lg:hidden flex relative items-center gap-2 cursor-pointer"
           >
             <div className="min-w-7 min-h-7 rounded-full relative overflow-hidden">
-              <img src={"/"} alt="profile" className="w-7 h-7 object-cover" />
+              <img src={user?.avatar} alt="profile" className="w-7 h-7 object-cover" />
             </div>
             <p className="font-semibold truncate max-w-[100px] hover:opacity-80">
               {user?.name || user?.email}

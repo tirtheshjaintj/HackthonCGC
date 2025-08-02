@@ -92,6 +92,7 @@ const SignUp = () => {
     }
   };
 
+
   return (
     <div className="">
       {/* <div className="fixed z-50 top-0 w-full bg-white dark:bg-stone-900">
@@ -153,18 +154,15 @@ const SignUp = () => {
             or
             <div className="h-[1px] flex-1 dark:bg-stone-800 bg-stone-300 "></div>
           </div>
-
-          <GoogleOAuthProvider clientId="702829994495-pfp4ughca3dhaio31i8qj372b9rg595f.apps.googleusercontent.com">
-            <div className="md:w-[450px] max-sm:w-[260px] border-none  rounded-full mx-auto">
-              <div className="mt-4  rounded-full dark:bg-stone-800">
-                <GoogleLogin
-                  theme={"filled_white"}
-                  onSuccess={handleGoogleLoginSuccess}
-                  onError={handleGoogleLoginFailure}
-                />
-              </div>
+          <div className="md:w-[450px] max-sm:w-[260px] border-none  rounded-full mx-auto">
+            <div className="mt-4  rounded-full dark:bg-stone-800">
+              <GoogleLogin
+                theme={"filled_white"}
+                onSuccess={handleGoogleLoginSuccess}
+                onError={handleGoogleLoginFailure}
+              />
             </div>
-          </GoogleOAuthProvider>
+          </div>
         </div>
       </div>
     </div>

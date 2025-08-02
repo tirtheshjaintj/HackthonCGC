@@ -4,15 +4,19 @@ import { FaImage, FaTimes } from "react-icons/fa";
 import toast from "react-hot-toast";
 import usePageSetup from "../hooks/UsePageSetup";
 import axiosInstance from "../axios/axiosConfig";
+import { useNavigate, useParams } from "react-router-dom";
+import Swal from "sweetalert2";
 
 function EditReport() {
-    usePageSetup("Create New Report");
-
+    usePageSetup("Edit Report");
+    const { report_id } = useParams();
     const [reportDetails, setReportDetails] = useState({
         description: "",
         anonymous: false,
         category: "",
     });
+
+    const navigate = useNavigate();
 
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -25,6 +29,10 @@ function EditReport() {
         () => imageFiles.map((file) => URL.createObjectURL(file)),
         [imageFiles]
     );
+    const [existingImages, setExistingImages] = useState([]);
+    const [isFetching, setIsFetching] = useState(true);
+    const [deleting, setDeleting] = useState(false);
+
 
 
     const handleChange = (e) => {
@@ -63,6 +71,31 @@ function EditReport() {
         setImageFiles(updatedImages);
     };
 
+    const handleDeleteImage = async (imageId) => {
+        const result = await Swal.fire({
+            title: "Delete Image?",
+            text: "Are you sure you want to delete this image?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Yes, delete it!",
+        });
+
+        if (result.isConfirmed) {
+            try {
+                setDeleting(true);
+                await axiosInstance.delete(`/report/image/${imageId}`);
+                toast.success("Image deleted.");
+                setExistingImages((prev) => prev.filter((img) => img._id !== imageId));
+            } catch (err) {
+                console.error(err);
+                toast.error("Failed to delete image.");
+            } finally {
+                setDeleting(false);
+            }
+        }
+    };
+
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -81,8 +114,14 @@ function EditReport() {
             return;
         }
 
-        if (imageFiles.length === 0) {
+        const totalImages = existingImages.length + imageFiles.length;
+        if (totalImages === 0) {
             toast.error("At least one image is required!");
+            return;
+        }
+
+        if (totalImages > 10) {
+            toast.error("Maximum 10 images allowed!");
             return;
         }
 
@@ -95,29 +134,27 @@ function EditReport() {
             formData.append("latitude", location.lat);
             formData.append("longitude", location.lng);
 
+            // Append only new files
             imageFiles.forEach((file) => {
                 formData.append("files", file);
             });
 
-            await axiosInstance.post("/report", formData, {
+            await axiosInstance.post(`/report/edit/${report_id}`, formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
             });
-            toast.success("Report Created Successfully!");
-            setReportDetails({
-                description: "",
-                anonymous: false,
-                category: "",
-            });
-            setImageFiles([]);
+
+            toast.success("Report updated successfully!");
+            navigate("/my-reports");
         } catch (err) {
             console.log(err);
-            toast.error("Failed to submit the report.");
+            toast.error("Failed to update the report.");
         } finally {
             setLoading(false);
         }
     };
+
 
 
     const getCategories = async () => {
@@ -126,12 +163,63 @@ function EditReport() {
             setCategories(response.data.data);
         } catch (error) {
             console.log(error);
-            toast.error("Error fetching Categoriess");
+            toast.error("Error fetching Categories");
         }
     }
+    const getReport = async () => {
+        try {
+            setIsFetching(true);
+            const response = await axiosInstance.get(`/report/auth/id/${report_id}`);
+            const data = response.data.data;
+
+            setReportDetails({
+                description: data.description || "",
+                anonymous: data.anonymous || false,
+                category: data.category_id?._id || "",
+            });
+
+            setExistingImages(data.images || []);
+            setLocation({
+                lat: data.latitude,
+                lng: data.longitude,
+            });
+
+        } catch (error) {
+            console.log(error);
+            toast.error("Error fetching Report");
+            navigate("/404");
+        } finally {
+            setIsFetching(false);
+        }
+    };
+    const handleDeleteReport = async () => {
+        const result = await Swal.fire({
+            title: "Delete Report?",
+            text: "This action is irreversible!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Yes, delete it!",
+        });
+
+        if (result.isConfirmed) {
+            try {
+                setDeleting(true);
+                await axiosInstance.delete(`/report/${report_id}`);
+                toast.success("Report deleted successfully.");
+                navigate("/my-reports");
+            } catch (err) {
+                console.error(err);
+                toast.error("Failed to delete report.");
+            } finally {
+                setDeleting(false);
+            }
+        }
+    };
+
 
     useEffect(() => {
         getCategories();
+        getReport();
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 (position) => {
@@ -161,12 +249,12 @@ function EditReport() {
             transition={{ duration: 0.4 }}
         >
             <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">
-                Create New Report
+                Edit Report
             </h2>
 
-            <form onSubmit={handleSubmit} className="space-y-5">
-
-
+            {isFetching ? (
+                <div className="animate-pulse text-center py-10 text-gray-500 dark:text-gray-400">Loading report data...</div>
+            ) : (<form onSubmit={handleSubmit} className="space-y-5">
                 {/* Description */}
                 <textarea
                     name="description"
@@ -202,7 +290,7 @@ function EditReport() {
                         className="w-5 h-5"
                     />
                     <label htmlFor="anonymous" className="text-gray-700 dark:text-gray-300">
-                        Submit Anonymously
+                        Post  Anonymously
                     </label>
                 </div>
 
@@ -229,14 +317,39 @@ function EditReport() {
                         </label>
 
                         {/* Image Previews */}
+                        {/* Existing Image Previews */}
+                        {existingImages.map((img, index) => (
+                            <div
+                                key={`existing-${index}`}
+                                className="relative w-full aspect-square overflow-hidden rounded-md"
+                            >
+                                <img
+                                    src={img.image_url}
+                                    alt={`existing-${index}`}
+                                    className="object-cover w-full h-full"
+                                />
+                                <div
+                                    onClick={() => handleDeleteImage(img._id)}
+                                    className="absolute top-1 right-1 bg-black/70 p-1 rounded-full cursor-pointer text-white z-10"
+                                >
+                                    {deleting ? (
+                                        <div className="spinner"></div>
+                                    ) : (
+                                        <FaTimes size={12} />
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+
+                        {/* New Image Previews */}
                         {imagePreviews.map((preview, index) => (
                             <div
-                                key={index}
+                                key={`new-${index}`}
                                 className="relative w-full aspect-square overflow-hidden rounded-md"
                             >
                                 <img
                                     src={preview}
-                                    alt={`preview-${index}`}
+                                    alt={`new-preview-${index}`}
                                     className="object-cover w-full h-full"
                                 />
                                 <div
@@ -247,10 +360,24 @@ function EditReport() {
                                 </div>
                             </div>
                         ))}
+
                     </div>
                 </div>
 
                 {/* Submit */}
+                {/* Delete Report Button */}
+                <button
+                    type="button"
+                    onClick={handleDeleteReport}
+                    disabled={deleting}
+                    className="px-6 py-3 mt-4 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold"
+                >
+                    {deleting ? (
+                        <div className="spinner"></div>
+                    ) : (
+                        "Delete Report"
+                    )}
+                </button>
                 <button
                     type="submit"
                     disabled={!isLocationReady || loading}
@@ -259,6 +386,7 @@ function EditReport() {
                     {loading ? <div className="spinner" ></div> : "Submit Report"}
                 </button>
             </form>
+            )}
         </motion.div>
     );
 }
