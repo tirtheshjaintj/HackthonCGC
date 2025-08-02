@@ -14,7 +14,7 @@ const getToken = (user, exp = null) => {
     },
     process.env.JWT_SECRET,
     {
-      expiresIn: exp ? exp : "1d",
+      expiresIn: exp ? exp : "1y",
     }
   );
 };
@@ -241,7 +241,7 @@ export const verifyUserToken = asynchandler(async (req, res) => {
       res.status(401).json({ message: "Invalid token" });
     }
 
-    res.status(200).json({ user: user });
+    res.status(200).json({ user: user , token: token});
   } catch (error) {
     res.status(500).json({ message: "Invalid access token" });
   }
