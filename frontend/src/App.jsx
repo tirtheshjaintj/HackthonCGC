@@ -11,19 +11,7 @@ import { getCookie, removeCookie } from "./axios/cookieFunc";
 import axiosInstance from "./axios/axiosConfig";
 import useAuthStore from "./store/authSlice/authSlice";
 import { Toaster } from "react-hot-toast";
-// import other components like Login, Home, etc. when available
-
-const routes = [
-  {
-    path:'/',
-    element:<HomePage/>
-  },
-  {
-    path:'/report/:reportId',
-    element:<ReportDetails/>
-  }
-]
-
+ 
 function App() {
   const navigate = useNavigate();
   const { setUser, logout } = useAuthStore((state) => state);
