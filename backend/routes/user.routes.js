@@ -3,6 +3,7 @@ import {
   registerUser,
   loginUser,
   GoogleSignIn,
+  verifyUserToken,
 } from "../controllers/user.controller.js";
 import authcheck from "../middlewares/authcheck.js";
 
@@ -21,6 +22,7 @@ userRouter.post("/login", loginUser);
 
 // Google Sign-In
 userRouter.post("/google-signin", GoogleSignIn);
+userRouter.get("/verifyauth", verifyUserToken);
 
 // router.get('/all' , getAllUsers)
 

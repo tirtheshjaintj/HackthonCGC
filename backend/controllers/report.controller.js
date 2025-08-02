@@ -219,7 +219,7 @@ export const getReports = expressAsyncHandler(async (req, res) => {
     const { latitude, longitude, distance = 5 } = req.body;
     const validDistance = [1, 3, 5];
     if (!validDistance.includes(distance)) throw new AppError("Not Valid Distance", 401);
-    const reports = await Report.find().populate("images").populate("category_id").populate("user_id");
+    const reports = await Report.find({ hidden: false }).populate("images").populate("category_id").populate("user_id");
     const filteredReports = reports.filter((report) => {
         const d = calculateDistanceKm(latitude, longitude, report.latitude, report.longitude);
         return d <= distance;
@@ -304,3 +304,11 @@ export const getCategories = expressAsyncHandler(async (req, res) => {
 });
 
 
+
+
+
+export const getLogs = expressAsyncHandler(async (req, res) => {
+    const { reportId } = req.params;
+    const logs = await HistoryLogs.find({ report_id: reportId }).sort({ createdAt: -1 });
+    res.status(200).json({ status: true, data: logs });
+});

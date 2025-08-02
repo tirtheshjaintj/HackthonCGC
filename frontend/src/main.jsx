@@ -1,3 +1,4 @@
+ 
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
@@ -5,8 +6,7 @@ import App from './App.jsx';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Login from "./modules/auth/Login";
-import AdminLogin from "./modules/adminAuth/Login";
-import HomePage from "./modules/home/pages/HomePage";
+ import HomePage from "./modules/home/pages/HomePage";
 import NotFoundPage from './modules/home/pages/NotFound.jsx';
 import CreateReport from './modules/CreateReport.jsx';
 import SignUp from './modules/auth/SignUp.jsx';
@@ -25,8 +25,8 @@ const router = createBrowserRouter([
         element: <Login />,
       },
       {
-        path: "/admin/login",
-        element: <AdminLogin />,
+        path: "/signup",
+        element: <SignUp />,
       },
       {
         path: "/create",

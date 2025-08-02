@@ -1,13 +1,66 @@
+import {
+  useNavigate,
+  Outlet,
+} from "react-router-dom";
+
+import { useEffect } from "react";
+import { getCookie, removeCookie } from "./axios/cookieFunc";
+import axiosInstance from "./axios/axiosConfig";
+import useAuthStore from "./store/authSlice/authSlice";
+import HomePage from "./modules/home/pages/HomePage";
+import ReportDetails from "./modules/ReportDetails/ReportDetails";
 import { Toaster } from "react-hot-toast";
-import { Outlet } from "react-router-dom";
+// import other components like Login, Home, etc. when available
+
+const routes = [
+  {
+    path: '/',
+    element: <HomePage />
+  },
+  {
+    path: '/report/:reportId',
+    element: <ReportDetails />
+  }
+]
 
 function App() {
+  const navigate = useNavigate();
+  const { setUser, logout } = useAuthStore((state) => state);
+  const fetchUserData = async () => {
+    try {
+      const token = getCookie("authToken");
+      console.log(token);
+      if (token) {
+        const res = await axiosInstance.get(`/user/verifyauth`);
+        // dispatch(setCurrUser(res?.data?.user));
+        setUser({ user: res?.data?.user, accessToken: res?.data?.token });
+      } else {
+        // dispatch(clearCurrUser());
+        navigate("/login");
+      }
+    } catch (error) {
+      // dispatch(clearCurrUser());
+      logout();
+      removeCookie("authToken");
+      console.log(error.response);
+      if (error?.response?.data?.expiredSession) {
+        alert(error.response.data.message);
+      }
+      navigate("/login");
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
   return (
     <>
       <Outlet />
       <Toaster position="bottom-right" />
     </>
-  )
-};
+  );
+}
 
 export default App;

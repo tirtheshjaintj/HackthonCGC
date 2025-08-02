@@ -1,7 +1,6 @@
-import axios from 'axios';
-import axiosRetry from 'axios-retry';
-import Cookie from "universal-cookie";
-import { getCookie } from './cookieFunc';
+import axios from "axios";
+import axiosRetry from "axios-retry";
+import { getCookie } from "./cookieFunc";
 
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_BACKEND_URL,
@@ -16,16 +15,19 @@ axiosRetry(axiosInstance, {
   shouldResetTimeout: true,
 });
 
-axiosInstance.interceptors.request.use(config => {
-  const cookie = new Cookie();
-  const token = getCookie("accessToken");
 
-  if (token) {
-    config.headers['Authorization'] = `Bearer ${token}`;
+axiosInstance.interceptors.request.use(
+  (config) => {
+    const token = getCookie("authToken");
+
+    if (token) {
+      config.headers["Authorization"] = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
   }
-  return config;
-}, error => {
-  return Promise.reject(error);
-});
+);
 
 export default axiosInstance;
