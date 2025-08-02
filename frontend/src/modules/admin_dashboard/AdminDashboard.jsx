@@ -8,12 +8,15 @@ import useAuthStore from "../../store/authSlice/authSlice";
 export default function AdminDashboard() {
   const [open, setOpen] = useState(true);
   const user = useAuthStore((state) => state.user);
+  console.log(user);
   const navigate = useNavigate();
   useEffect(() => {
-    if (!user?.isAdmin) {
-      navigate("/");
+    if (user) {
+      if (!user?.isAdmin) {
+        navigate("/");
+      }
     }
-  }, []);
+  }, [user?.isAdmin]);
 
   return (
     <div
@@ -52,8 +55,6 @@ export default function AdminDashboard() {
         <div className="w-full min-h-full px-1 mt-6 overflow-x-hidden overflow-y-auto bg-slate-50">
           <Outlet />
         </div>
-
-        <div></div>
       </div>
     </div>
   );

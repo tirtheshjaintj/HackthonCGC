@@ -9,15 +9,20 @@ import authcheck, { authcheckAdmin } from "../middlewares/authcheck.js";
 const reportRouter = Router();
 
 reportRouter.post(
-    "/",
-    upload.array("files", 10), // max 10 images
-    createReportValidator,
-    validate,
-    authcheck,
-    createReport
+  "/",
+  upload.array("files", 10), // max 10 images
+  createReportValidator,
+  validate,
+  authcheck,
+  createReport
 );
 
-reportRouter.post("/edit/:reportId", upload.array("files", 10), authcheck, editReport);
+reportRouter.post(
+  "/edit/:reportId",
+  upload.array("files", 10),
+  authcheck,
+  editReport
+);
 reportRouter.post("/nearby", getReports);
 reportRouter.get("/categories", getCategories);
 reportRouter.get("/my", authcheck, myReports);

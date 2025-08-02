@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { navListItems } from "../../constants/constants";
 import { Menu, LogOut, LogIn } from "lucide-react"; // Replace with your icon library
 import useAuthStore from "../../store/authSlice/authSlice";
+import { removeCookie } from "../../axios/cookieFunc";
 
 export default function NavBar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -13,6 +14,7 @@ export default function NavBar() {
 
   const user = useAuthStore((state) => state.user);
   const setUser = useAuthStore((state) => state.setUser);
+  const navigate = useNavigate()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -80,7 +82,12 @@ export default function NavBar() {
                 <h4 className="text-gray-700 font-semibold">Profile</h4>
                 <div className="h-px w-full bg-gray-200" />
                 <div
-                  onClick={() => setLogutModalOpen(true)}
+                  onClick={() => {
+                    removeCookie('authToken')
+                    navigate('/login')
+                    window.location.reload()
+                    
+                  }}
                   className="flex items-center gap-3 cursor-pointer hover:opacity-70 text-red-500"
                 >
                   <LogOut strokeWidth={1.5} className="rotate-180" />
