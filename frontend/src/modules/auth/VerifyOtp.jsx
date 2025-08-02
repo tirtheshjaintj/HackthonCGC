@@ -88,11 +88,10 @@ const VerifyOtp = () => {
           <button
             type="submit"
             disabled={otp.some((d) => d === '') || loading}
-            className={`w-full flex justify-center items-center gap-2 py-2 rounded-md text-white font-medium transition ${
-              otp.every((d) => d !== '') && !loading
+            className={`w-full flex justify-center items-center gap-2 py-2 rounded-md text-white font-medium transition ${otp.every((d) => d !== '') && !loading
                 ? 'bg-gradient-to-r from-green-400 to-green-600 hover:opacity-90'
                 : 'bg-gray-300 cursor-not-allowed'
-            }`}
+              }`}
           >
             {loading ? (
               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>

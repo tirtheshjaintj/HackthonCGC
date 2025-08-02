@@ -1,8 +1,10 @@
 import React from "react";
 import NavBar from "../../../components/navbar/NavBar";
 import HomeCard from "../../../components/HomeCard";
+import usePageSetup from "../../../hooks/UsePageSetup";
 
 export default function HomePage() {
+  usePageSetup("Home");
   return (
     <div>
       <NavBar />

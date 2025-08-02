@@ -1,29 +1,13 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Register from './modules/auth/Register';
-import VerifyOtp from './modules/auth/VerifyOtp';
-import Login from './modules/auth/Login';
-import AdminLogin from './modules/adminAuth/Login';
-import HomePage from './modules/home/pages/HomePage';
-// import other components like Login, Home, etc. when available
+import { Toaster } from "react-hot-toast";
+import { Outlet } from "react-router-dom";
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        {/* <Route path="/" element={<Register />} />
-        <Route path="/verify-otp" element={<VerifyOtp />} /> */}
-
-        {/* Example routes */}
-        {/* <Route path="/login" element={<Login />} /> */}
-        <Route path="/" element={<HomePage />} />
-        <Route path="/login" element={<Login />} />
-        
-        <Route path="/admin/login" element={<AdminLogin />} />
-
-        {/* <Route path="/" element={<Home />} /> */}
-      </Routes>
-    </Router>
-  );
+    <>
+      <Outlet />
+      <Toaster position="bottom-right" />
+    </>
+  )
 }
 
 export default App;

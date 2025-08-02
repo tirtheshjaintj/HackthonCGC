@@ -61,15 +61,15 @@ const AdminLogin = () => {
           />
 
           <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 rounded-lg hover:opacity-90 transition font-semibold flex items-center justify-center"
-                >
-                {isLoading ? (
-                    <FaSpinner className="animate-spin mr-2" />
-                ) : null}
-                {isLoading ? 'Logging in...' : 'Login'}
-                </button>
+            type="submit"
+            disabled={isLoading}
+            className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 rounded-lg hover:opacity-90 transition font-semibold flex items-center justify-center"
+          >
+            {isLoading ? (
+              <FaSpinner className="animate-spin mr-2" />
+            ) : null}
+            {isLoading ? 'Logging in...' : 'Login'}
+          </button>
         </form>
 
       </div>
