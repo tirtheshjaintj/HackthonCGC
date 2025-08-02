@@ -238,7 +238,7 @@ export const getReports = expressAsyncHandler(async (req, res) => {
     const { latitude, longitude, distance = 5 } = req.body;
     const validDistance = [1, 3, 5];
     if (!validDistance.includes(distance)) throw new AppError("Not Valid Distance", 401);
-    const reports = await Report.find().populate("images").populate("category_id").populate("user_id");
+    const reports = await Report.find({hidden:false}).populate("images").populate("category_id").populate("user_id");
     const filteredReports = reports.filter((report) => {
         const d = calculateDistanceKm(latitude, longitude, report.latitude, report.longitude);
         return d <= distance;
@@ -277,3 +277,49 @@ export const changeStatus = expressAsyncHandler(async (req, res) => {
     res.status(200).json({ status: true, message: "Status updated successfully", data: report });
 });
 
+<<<<<<< HEAD
+  
+  const history = await HistoryLogs.create({
+    report_id: report._id,
+    action: `Report created by ${user.name}`,
+  })
+
+  let msg = "";
+
+    if (status === 2) {
+    msg = "The report has been marked as 'In Progress'. Our team is actively working on it and it will be resolved soon.";
+    } else if (status === 3) {
+    msg = "The report has been marked as 'Completed'. It is now visible to the public.";
+    }
+
+    await sendEmail(
+    "Report Status Updated",
+    report.user.email,
+    `Hello ${user.name || "User"},
+
+    ${msg}
+
+    Thank you for your contribution to CivicTrack.
+
+    – CivicTrack Team`
+    );
+
+
+  res
+    .status(200)
+    .json({
+      status: true,
+      message: "Status updated successfully",
+      data: report,
+    });
+})
+
+
+
+export const getLogs = expressAsyncHandler(async (req, res) => {
+  const { reportId } = req.params;
+  const logs = await HistoryLogs.find({ report_id: reportId }).sort({ createdAt: -1 });
+  res.status(200).json({ status: true, data: logs });
+});
+=======
+>>>>>>> e3edec3ff9a1bf9a734f0c1e495dc22a2306c880
