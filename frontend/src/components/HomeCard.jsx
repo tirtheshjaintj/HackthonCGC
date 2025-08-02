@@ -1,8 +1,49 @@
 import { FaThumbsUp, FaFlag } from "react-icons/fa";
+import axiosInstance from "../axios/axiosConfig";
+import toast from "react-hot-toast";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-export default function HomeCard({ item, onUpvote, onFlag }) {
+export default function HomeCard({ item }) {
+  const [flagCount, setflagCount] = useState(item?.flag_count ?? 0);
+  const [upvoteCount, setUpvoteCount] = useState(item?.upvote_count ?? 0);
+  const navigate = useNavigate();
+  const handleUpvote = async () => {
+  try {
+    const response = await axiosInstance.post(`/util/upvote/${item.id}`);
+    const { data } = response.data;
+
+    if (data === false) {
+      setUpvoteCount(prev => prev + 1);
+      toast.success("Upvoted Successfully");
+    } else {
+      setUpvoteCount(prev => Math.max(prev - 1, 0));
+      toast.info("Upvote removed");
+    }
+  } catch (error) {
+    console.error("Upvote error:", error);
+  }
+};
+
+const handleFlag = async () => {
+  try {
+    const response = await axiosInstance.post(`/util/flag/${item.id}`);
+    const { data } = response.data;
+
+    if (data === false) {
+      setflagCount(prev => prev + 1);
+      toast.success("Flagged Successfully");
+    } else {
+      setflagCount(prev => Math.max(prev - 1, 0));
+      toast.info("Flag removed");
+    }
+  } catch (error) {
+    console.error("Flag error:", error);
+  }
+};
+
   return (
-    <div className="cursor-pointer transition-all duration-300 bg-white rounded-2xl shadow-md hover:shadow-xl border border-gray-200 overflow-hidden max-w-sm">
+    <div onClick={()=>navigate(`/report/${item.id}`)} className="cursor-pointer transition-all duration-300 bg-white rounded-2xl shadow-md hover:shadow-xl border border-gray-200 overflow-hidden max-w-sm">
       <img
         src={item.images?.[0]}
         alt="report"
@@ -25,16 +66,16 @@ export default function HomeCard({ item, onUpvote, onFlag }) {
 
         <div className="flex justify-between items-center mt-2">
           <button
-            onClick={() => onUpvote?.(item)}
+            onClick={() => handleUpvote()}
             className="flex items-center gap-1 text-sm text-[#272727] hover:text-blue-600"
           >
-            <FaThumbsUp size={14} /> Upvote
+            <FaThumbsUp size={14} /> {upvoteCount} Upvote
           </button>
           <button
-            onClick={() => onFlag?.(item)}
+            onClick={() => handleFlag()}
             className="flex items-center gap-1 text-sm text-[#272727] hover:text-red-600"
           >
-            <FaFlag size={14} /> Flag
+            <FaFlag size={14} />{flagCount} Flag
           </button>
         </div>
       </div>

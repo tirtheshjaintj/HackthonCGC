@@ -26,6 +26,7 @@ const routes = [
 function App() {
   const navigate = useNavigate();
   const { setUser, logout } = useAuthStore((state) => state);
+  
   const fetchUserData = async () => {
     try {
       const token = getCookie("authToken");
