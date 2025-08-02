@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET || "";
-const expiresIn = process.env.TOKEN_EXPIRATION || "1h";
+const expiresIn = process.env.TOKEN_EXPIRATION || "1y";
 
 export const setUser = (user) => {
     const options = { expiresIn };

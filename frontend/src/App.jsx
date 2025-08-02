@@ -14,7 +14,8 @@ import { Toaster } from "react-hot-toast";
  
 function App() {
   const navigate = useNavigate();
-  const { setUser, logout } = useAuthStore((state) => state);
+  const { user,setUser, logout } = useAuthStore((state) => state);
+  // console.log(user)
   const fetchUserData = async () => {
     try {
       const token = getCookie("authToken");
