@@ -10,6 +10,7 @@ import { useEffect } from "react";
 import { getCookie, removeCookie } from "./axios/cookieFunc";
 import axiosInstance from "./axios/axiosConfig";
 import useAuthStore from "./store/authSlice/authSlice";
+import { Toaster } from "react-hot-toast";
 // import other components like Login, Home, etc. when available
 
 function App() {
