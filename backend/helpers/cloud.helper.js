@@ -8,9 +8,6 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-/**
- * Delete an image from Cloudinary using its public_id
- */
 export const deleteFromCloud = (public_id) => {
     return new Promise((resolve, reject) => {
         cloudinary.uploader.destroy(public_id, (error, result) => {
@@ -20,9 +17,7 @@ export const deleteFromCloud = (public_id) => {
     });
 };
 
-/**
- * Upload a file buffer to Cloudinary under the 'posts' folder
- */
+
 const uploadToCloud = (fileBuffer) => {
     return new Promise((resolve, reject) => {
         const uploadStream = cloudinary.uploader.upload_stream(
