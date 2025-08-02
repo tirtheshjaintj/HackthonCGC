@@ -4,6 +4,7 @@ import {
   verifyOtp,
   login,
   googleSignIn,
+  getAllUsers,
 } from "../controllers/user.controller.js";
 import authcheck from "../middlewares/authcheck.js";
 
@@ -23,5 +24,7 @@ userRouter.post("/login", login);
 
 // Google Sign-In
 userRouter.post("/google-signin", googleSignIn);
+
+router.get('/all' , getAllUsers)
 
 export default userRouter;
