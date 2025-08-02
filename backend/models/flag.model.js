@@ -15,7 +15,7 @@ const flagSchema = new Schema(
         reason: {
             type: String,
             trim: true,
-            default: "", // Optional reason for flagging
+            default: "",
         },
     },
     { timestamps: true }

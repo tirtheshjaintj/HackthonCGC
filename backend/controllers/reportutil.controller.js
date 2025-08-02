@@ -17,6 +17,13 @@ export const toggleFlag = expressAsyncHandler(async (req, res) => {
         return res.json({ status: true, message: "Flag removed from report", data: false });
     } else {
         await Flag.create({ report_id, user_id, reason });
+
+        const flags = await Flag.find({ report_id });
+        if(flags.length >=5) {
+            const report = await Report.findById(report_id);
+            report.hidden = true;
+            await report.save();
+        }
         return res.json({ status: true, message: "report flagged successfully", data: true });
     }
 });

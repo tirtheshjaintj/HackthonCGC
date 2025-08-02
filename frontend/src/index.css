@@ -27,3 +27,5 @@
 
   --color-utsav-white: #ffffff;
 }
+/* Add this line */
+@import "leaflet/dist/leaflet.css";
