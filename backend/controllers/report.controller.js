@@ -274,11 +274,6 @@ export const changeStatus = expressAsyncHandler(async (req, res) => {
     report.status = status;
     await report.save();
 
-    res.status(200).json({ status: true, message: "Status updated successfully", data: report });
-});
-
-<<<<<<< HEAD
-  
   const history = await HistoryLogs.create({
     report_id: report._id,
     action: `Report created by ${user.name}`,
@@ -312,7 +307,10 @@ export const changeStatus = expressAsyncHandler(async (req, res) => {
       message: "Status updated successfully",
       data: report,
     });
-})
+
+});
+
+  
 
 
 
@@ -321,5 +319,3 @@ export const getLogs = expressAsyncHandler(async (req, res) => {
   const logs = await HistoryLogs.find({ report_id: reportId }).sort({ createdAt: -1 });
   res.status(200).json({ status: true, data: logs });
 });
-=======
->>>>>>> e3edec3ff9a1bf9a734f0c1e495dc22a2306c880
