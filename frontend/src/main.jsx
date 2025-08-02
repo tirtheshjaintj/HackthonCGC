@@ -4,6 +4,7 @@ import App from './App.jsx';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Login from "./modules/auth/Login";
+<<<<<<< HEAD
 // import AdminLogin from "./modules/adminAuth/Login";
 import HomePage from "./modules/home/pages/HomePage";
 import NotFoundPage from './modules/NotFound.jsx';
@@ -11,6 +12,13 @@ import CreateReport from './modules/CreateReport.jsx';
 import SignUp from './modules/auth/SignUp.jsx';
 import ReportDetails from "./modules/ReportDetails/ReportDetails";
 import EditReport from './modules/EditReport.jsx';
+=======
+ import HomePage from "./modules/home/pages/HomePage";
+import NotFoundPage from './modules/NotFound.jsx';
+import CreateReport from './modules/CreateReport.jsx';
+import SignUp from './modules/auth/SignUp.jsx';
+import ReportDetails from './modules/ReportDetails/ReportDetails.jsx';
+>>>>>>> c6b107eaeba7967acdf4625082735a6d3addba17
 
 const router = createBrowserRouter([
   {
@@ -20,6 +28,10 @@ const router = createBrowserRouter([
       {
         path: "/",
         element: <HomePage />,
+      },
+      {
+        path:'report/:reportId',
+        element:<ReportDetails/>
       },
       {
         path: "/login",

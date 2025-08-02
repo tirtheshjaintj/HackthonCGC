@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { allReports, changeStatus, createReport, deleteImage, deleteReport, editReport, getCategories, getLogs, getReportById, getReports, myReports } from "../controllers/report.controller.js";
+import { allReports, changeStatus, createReport, editReport, getCategories, getLogs, getReportById, getReports, myReports } from "../controllers/report.controller.js";
 
 import { createReportValidator } from "../validators/report.validator.js";
 import validate from "../middlewares/validate.js";

@@ -113,7 +113,7 @@ export const createReport = expressAsyncHandler(async (req, res) => {
 
     const history = await HistoryLogs.create({
         report_id: report._id,
-        action: `Report created by ${user.name}`,
+        action: `Report created by ${user.username}`,
     })
 
     await sendEmail(
@@ -276,8 +276,8 @@ export const deleteImage = expressAsyncHandler(async (req, res) => {
 
 
 export const getReports = expressAsyncHandler(async (req, res) => {
-    const { latitude, longitude, distance = 5 } = req.body;
-    const validDistance = [1, 3, 5];
+    const { latitude, longitude, distance } = req.body;
+    const validDistance = [1, 3, 5 , 50];
     if (!validDistance.includes(distance)) throw new AppError("Not Valid Distance", 401);
     const reports = await Report.find({ hidden: false }).populate("images").populate("category_id").populate("user_id");
     const filteredReports = reports.filter((report) => {
