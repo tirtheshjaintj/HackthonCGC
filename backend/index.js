@@ -6,7 +6,6 @@ import { errorHandler } from "./helpers/error.helper.js";
 import "dotenv/config";
 import homeRouter from "./routes/index.js";
 
-
 const allowedOrigins = [
     "*",
     process.env.FRONTEND_URL

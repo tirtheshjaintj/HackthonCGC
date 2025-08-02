@@ -127,7 +127,6 @@ export const myReports = expressAsyncHandler(async (req, res) => {
         .populate("images")
         .populate("category_id")
         .sort({ createdAt: -1 });
-
     res.status(200).json({ status: true, count: reports.length, data: reports });
 });
 
@@ -141,14 +140,11 @@ export const allReports = expressAsyncHandler(async (req, res) => {
 export const changeStatus = expressAsyncHandler(async (req, res) => {
     const { reportId } = req.params;
     const { status } = req.body;
-
     const report = await Report.findById(reportId);
     if (!report) return res.status(404).json({ status: false, message: "Report not found" });
-
     if (status <= report.status) {
         return res.status(400).json({ status: false, message: "New status must be greater than current status" });
     }
-
     report.status = status;
     await report.save();
 

@@ -22,6 +22,7 @@ export async function sendEmail(subject, receiver, html) {
     html
   };
   try {
+
     await transporter.sendMail(mailOptions);
     console.log("Mail sent to:", receiver);
     return true;
@@ -32,6 +33,8 @@ export async function sendEmail(subject, receiver, html) {
 }
 
 export async function sendOTP(receiver, otp) {
+  console.log("GMAIL_USER:", process.env.GMAIL_USER);
+  console.log("GMAIL_PASS:", process.env.GMAIL_PASS ? "Loaded" : "Missing");
   const subject = "Your OTP Code";
   const html = `
     <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f9f9f9;">

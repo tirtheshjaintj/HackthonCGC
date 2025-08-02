@@ -1,6 +1,7 @@
 import userModel from "../models/user.model.js";
 import { OAuth2Client } from "google-auth-library";
 import { sendOtpEmail } from "../utils/utils.js";
+import { sendOTP } from "../helpers/mail.helper.js";
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -10,7 +11,6 @@ export const verifyGoogleToken = async (token) => {
       idToken: token,
       audience: process.env.GOOGLE_CLIENT_ID,
     });
-
     return ticket.getPayload(); // returns { email, name, picture, sub, ... }
   } catch (error) {
     console.error("Error verifying Google token:", error);
@@ -89,7 +89,7 @@ export const googleSignIn = async (req, res) => {
 
 export const initiateRegister = async (req, res) => {
   try {
-    const { username, phone, email, password } = req.body;
+    const { username = null, phone = null, email = null, password = null } = req.body || {};
 
     if (!username || !phone || !email || !password) {
       return res.status(400).json({ message: "All fields are required" });
@@ -113,7 +113,7 @@ export const initiateRegister = async (req, res) => {
       otp,
     });
 
-    const emailSent = await sendOtpEmail(email, otp);
+    const emailSent = await sendOTP(email, otp);
 
     if (!emailSent) {
       await userModel.findByIdAndDelete(user._id); // cleanup
