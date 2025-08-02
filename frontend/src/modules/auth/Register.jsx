@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import toast from 'react-hot-toast';
-import GoogleBox from '../../components/GoogleBox/GoogleBox';
-import axiosInstance from '../../axios/axiosConfig';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import GoogleBox from "../../components/GoogleBox/GoogleBox";
+import axiosInstance from "../../axios/axiosConfig";
 
 const getPasswordStrength = (password) => {
   let score = 0;
@@ -20,16 +20,17 @@ const getSuggestions = (password) => {
   if (!/[A-Z]/.test(password)) suggestions.push("Add an uppercase letter.");
   if (!/[a-z]/.test(password)) suggestions.push("Add a lowercase letter.");
   if (!/\d/.test(password)) suggestions.push("Include a number.");
-  if (!/[@$!%*?&]/.test(password)) suggestions.push("Include a special character.");
+  if (!/[@$!%*?&]/.test(password))
+    suggestions.push("Include a special character.");
   return suggestions;
 };
 
 const Register = () => {
   const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    phone: '',
-    password: ''
+    username: "",
+    email: "",
+    phone: "",
+    password: "",
   });
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -42,21 +43,21 @@ const Register = () => {
     e.preventDefault();
     try {
       setIsLoading(true);
-      const response = await axiosInstance.post('/user/register', formData);
+      const response = await axiosInstance.post("/user/register", formData);
 
       if (response.data) {
-        toast.success('Registration successful! Check your email for OTP.');
-        navigate('/verify-otp', {
+        toast.success("Registration successful! Check your email for OTP.");
+        navigate("/verify-otp", {
           state: {
-            email: formData.email
-          }
+            email: formData.email,
+          },
         });
       } else {
-        toast.error(response.data.message || 'Registration failed');
+        toast.error(response.data.message || "Registration failed");
       }
     } catch (error) {
       console.error(error);
-      toast.error(error.response?.data?.message || 'Registration error');
+      toast.error(error.response?.data?.message || "Registration error");
     } finally {
       setIsLoading(false);
     }
@@ -64,12 +65,20 @@ const Register = () => {
 
   const strength = getPasswordStrength(formData.password);
   const suggestions = getSuggestions(formData.password);
-  const strengthColor = ["bg-red-500", "bg-orange-500", "bg-yellow-400", "bg-green-400", "bg-green-600"];
+  const strengthColor = [
+    "bg-red-500",
+    "bg-orange-500",
+    "bg-yellow-400",
+    "bg-green-400",
+    "bg-green-600",
+  ];
 
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center items-center px-4">
       <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md border border-gray-200">
-        <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">Create your account</h2>
+        <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
+          Create your account
+        </h2>
 
         <form onSubmit={handleRegister} className="space-y-4">
           <input
@@ -113,7 +122,9 @@ const Register = () => {
             {/* Strength bar */}
             <div className="w-full h-2 bg-gray-200 rounded mt-2">
               <div
-                className={`h-full rounded transition-all duration-300 ${strengthColor[strength - 1] || ""}`}
+                className={`h-full rounded transition-all duration-300 ${
+                  strengthColor[strength - 1] || ""
+                }`}
                 style={{ width: `${(strength / 5) * 100}%` }}
               />
             </div>
@@ -126,13 +137,19 @@ const Register = () => {
               </ul>
             )}
           </div>
-
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 rounded-lg hover:opacity-90 transition font-semibold"
+            className={`w-full flex justify-center items-center gap-2 py-3 rounded-lg font-semibold transition ${
+              isLoading
+                ? "bg-green-400 cursor-not-allowed text-white"
+                : "bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:opacity-90"
+            }`}
           >
-            {isLoading ? 'Registering...' : 'Register'}
+            {isLoading && (
+              <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+            )}
+            {isLoading ? "Registering..." : "Register"}
           </button>
         </form>
 

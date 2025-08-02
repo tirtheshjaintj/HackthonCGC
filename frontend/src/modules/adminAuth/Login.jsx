@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import axiosInstance from '../../axios/axiosConfig';
 import GoogleBox from '../../components/GoogleBox/GoogleBox';
 import { FaSpinner } from 'react-icons/fa';
-const Login = () => {
+const AdminLogin = () => {
   const [formData, setFormData] = useState({
     username: '',
     password: ''
@@ -20,10 +20,10 @@ const Login = () => {
     e.preventDefault();
     try {
       setIsLoading(true);
-      const response = await axiosInstance.post('/user/login', formData);
+      const response = await axiosInstance.post('/admin/login', formData);
       if (response.data) {
         toast.success('Login successful!');
-        navigate('/dashboard'); // change to your target page
+        navigate('/admin/dashboard'); // change to your target page
       } else {
         toast.error(response.data.message || 'Login failed');
       }
@@ -38,7 +38,7 @@ const Login = () => {
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center items-center px-4">
       <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md border border-gray-200">
-        <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">Login</h2>
+        <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">Admin Login</h2>
 
         <form onSubmit={handleLogin} className="space-y-4">
           <input
@@ -72,12 +72,9 @@ const Login = () => {
                 </button>
         </form>
 
-        <div className='mt-4' >
-            <GoogleBox/>
-        </div>
       </div>
     </div>
   );
 };
 
-export default Login;
+export default AdminLogin;

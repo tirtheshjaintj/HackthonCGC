@@ -5,9 +5,10 @@ import { useLocation } from 'react-router-dom';
 const VerifyOtp = () => {
   const [otp, setOtp] = useState(new Array(6).fill(''));
   const inputRefs = useRef([]);
-  
-    const location = useLocation();
-    const { email } = location.state || {};
+  const [loading, setLoading] = useState(false);
+
+  const location = useLocation();
+  const { email } = location.state || {};
 
   const handleChange = (e, index) => {
     const value = e.target.value;
@@ -15,8 +16,6 @@ const VerifyOtp = () => {
       const newOtp = [...otp];
       newOtp[index] = value;
       setOtp(newOtp);
-
-      // Move to next input
       if (value && index < 5) {
         inputRefs.current[index + 1].focus();
       }
@@ -39,14 +38,24 @@ const VerifyOtp = () => {
     }
   };
 
-  const handleSubmit = async(e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const enteredOtp = otp.join('');
     if (enteredOtp.length === 6) {
-      console.log('Submitting OTP:', enteredOtp);
-      // Add API call here
-      const response = await axiosInstance.post("/user/verify-otp", {email , otp: enteredOtp });
-      console.log(response.data);
+      try {
+        setLoading(true);
+        const response = await axiosInstance.post('/user/verify-otp', {
+          email,
+          otp: enteredOtp,
+        });
+        console.log(response.data);
+        // You can redirect or show success here
+      } catch (error) {
+        console.error(error);
+        // Handle error
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -66,6 +75,7 @@ const VerifyOtp = () => {
                 type="text"
                 inputMode="numeric"
                 maxLength="1"
+                disabled={loading}
                 value={digit}
                 onChange={(e) => handleChange(e, index)}
                 onKeyDown={(e) => handleKeyDown(e, index)}
@@ -77,14 +87,18 @@ const VerifyOtp = () => {
 
           <button
             type="submit"
-            disabled={otp.some((d) => d === '')}
-            className={`w-full py-2 rounded-md text-white font-medium transition ${
-              otp.every((d) => d !== '')
+            disabled={otp.some((d) => d === '') || loading}
+            className={`w-full flex justify-center items-center gap-2 py-2 rounded-md text-white font-medium transition ${
+              otp.every((d) => d !== '') && !loading
                 ? 'bg-gradient-to-r from-green-400 to-green-600 hover:opacity-90'
                 : 'bg-gray-300 cursor-not-allowed'
             }`}
           >
-            Verify
+            {loading ? (
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            ) : (
+              'Verify'
+            )}
           </button>
         </form>
       </div>
