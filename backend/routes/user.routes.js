@@ -6,21 +6,25 @@ import {
   googleSignIn,
   getAllUsers,
 } from "../controllers/user.controller.js";
+import authcheck from "../middlewares/authcheck.js";
 
-const router = express.Router();
+const userRouter = express.Router();
 
 // Register with OTP
-router.post("/register", initiateRegister);
+userRouter.post("/register", initiateRegister);
 
+userRouter.get("/", authcheck, async (req, res) => {
+  return req.user;
+});
 // Verify OTP
-router.post("/verify-otp", verifyOtp);
+userRouter.post("/verify-otp", verifyOtp);
 
 // Login (using email or username)
-router.post("/login", login);
+userRouter.post("/login", login);
 
 // Google Sign-In
-router.post("/google-signin", googleSignIn);
+userRouter.post("/google-signin", googleSignIn);
 
 router.get('/all' , getAllUsers)
 
-export default router;
+export default userRouter;
