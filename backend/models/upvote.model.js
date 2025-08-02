@@ -1,6 +1,6 @@
 import { Schema, model } from "mongoose";
 
-const flagSchema = new Schema(
+const upvoteSchema = new Schema(
     {
         user_id: {
             type: Schema.Types.ObjectId,
@@ -12,18 +12,13 @@ const flagSchema = new Schema(
             ref: "Report",
             required: true,
         },
-        reason: {
-            type: String,
-            trim: true,
-            default: "", // Optional reason for flagging
-        },
     },
     { timestamps: true }
 );
 
-// Ensure a user can flag a post only once
-flagSchema.index({ user_id: 1, report_id: 1 }, { unique: true });
+// Ensure a user can upvote a post only once
+upvoteSchema.index({ user_id: 1, report_id: 1 }, { unique: true });
 
-const Flag = model("Flag", flagSchema);
+const Upvote = model("Upvote", upvoteSchema);
 
-export default Flag;
+export default Upvote;

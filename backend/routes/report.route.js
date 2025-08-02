@@ -1,23 +1,28 @@
 import { Router } from "express";
-import { allReports, changeStatus, createReport, editReport, getReports, myReports } from "../controllers/report.controller.js";
+import { allReports, changeStatus, createReport, editReport, getReportById, getReports, myReports } from "../controllers/report.controller.js";
 import { createReportValidator } from "../validators/report.validator.js";
 import validate from "../middlewares/validate.js";
 import upload from "../middlewares/multer.js";
+import authcheck, { authcheckAdmin } from "../middlewares/authcheck.js";
 
 const reportRouter = Router();
 
 reportRouter.post(
     "/",
-    upload.array("images", 10), // max 10 images
+    upload.array("files", 10), // max 10 images
     createReportValidator,
     validate,
+    authcheck,
     createReport
 );
 
-reportRouter.put("/edit/:reportId", upload.array("images", 10), editReport);
+reportRouter.post("/edit/:reportId", upload.array("files", 10), authcheck, editReport);
 reportRouter.post("/nearby", getReports);
-reportRouter.get("/my", myReports);
-reportRouter.get("/all", allReports);
-reportRouter.patch("/status/:reportId", changeStatus);
+reportRouter.get("/my", authcheck, myReports);
+reportRouter.get("/id/:reportId", authcheck, getReportById);
+
+//Admin Ones
+reportRouter.get("/all", authcheckAdmin, allReports);
+reportRouter.post("/status/:reportId", authcheckAdmin, changeStatus);
 
 export default reportRouter;
