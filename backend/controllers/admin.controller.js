@@ -1,5 +1,5 @@
 import adminModel from "../models/admin.model.js";
-import userModel from "../models/user.model.js"; 
+import userModel from "../models/user.model.js";
 
 // Admin Login
 export const adminLogin = async (req, res) => {

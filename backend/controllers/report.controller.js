@@ -4,31 +4,89 @@ import Image from "../models/image.model.js";
 import Category from "../models/category.model.js";
 import userModel from "../models/user.model.js";
 import { AppError } from "../helpers/error.helper.js";
+import User from "../../../DhanRakshak/server/models/User.js";
+import { sendEmail } from "../helpers/mail.helper.js";
+import HistoryLogs from "../models/historylogs.model.js";
 import uploadToCloud from "../helpers/cloud.helper.js";
+import Upvote from "../models/upvote.model.js";
+import Flag from "../models/flag.model.js";
 
-// utils/distance.js
-export const calculateDistanceKm = (lat1, lon1, lat2, lon2) => {
-    const toRad = (val) => (val * Math.PI) / 180;
-    const R = 6371; // Radius of Earth in KM
+export const addCountsToReports = async (reports) => {
+    // Convert to plain objects to allow new properties
+    const plainReports = reports.map((r) => r.toObject());
 
-    const dLat = toRad(lat2 - lat1);
-    const dLon = toRad(lon2 - lon1);
+    // Get counts for all reports in bulk
+    const reportIds = plainReports.map((r) => r._id);
 
-    const a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(toRad(lat1)) *
-        Math.cos(toRad(lat2)) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
+    const [upvoteCounts, flagCounts] = await Promise.all([
+        Upvote.aggregate([
+            { $match: { report_id: { $in: reportIds } } },
+            { $group: { _id: "$report_id", count: { $sum: 1 } } },
+        ]),
+        Flag.aggregate([
+            { $match: { report_id: { $in: reportIds } } },
+            { $group: { _id: "$report_id", count: { $sum: 1 } } },
+        ]),
+    ]);
 
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c; // Distance in KM
+    // Convert to maps for fast lookup
+    const upvoteMap = Object.fromEntries(upvoteCounts.map((u) => [u._id.toString(), u.count]));
+    const flagMap = Object.fromEntries(flagCounts.map((f) => [f._id.toString(), f.count]));
+
+    // Attach counts to each report
+    return plainReports.map((report) => ({
+        ...report,
+        upvote_count: upvoteMap[report._id.toString()] || 0,
+        flag_count: flagMap[report._id.toString()] || 0,
+    }));
 };
 
 
+export const calculateDistanceKm = (lat1, lon1, lat2, lon2) => {
+  const toRad = (val) => (val * Math.PI) / 180;
+  const R = 6371; // Radius of Earth in KM
+
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) *
+      Math.cos(toRad(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c; // Distance in KM
+};
+
 export const createReport = expressAsyncHandler(async (req, res) => {
-    const { description, anonymous = false, latitude, longitude, category_id } = req.body;
-    const userId = req.user?._id; // adapt for auth
+  const {
+    description,
+    anonymous = false,
+    latitude,
+    longitude,
+    category_id,
+  } = req.body;
+  const userId = req.user?._id || req.body.user_id; // adapt for auth
+
+  // Ensure at least 1 image and max 10
+  // if (!req.files || req.files.length === 0) {
+  //     return res.status(400).json({ status: false, message: "At least one image is required" });
+  // }
+
+  // if (req.files.length > 10) {
+  //     return res.status(400).json({ status: false, message: "Maximum 10 images allowed" });
+  // }
+
+  // Create image documents
+  // const imageDocs = await Promise.all(
+  //     req.files.map(async (file) => {
+  //         return await Image.create({
+  //             report_id: null, // will link after report is created
+  //             image_url: file.path, // or file.location if using S3
+  //         });
+  //     })
 
     // Ensure at least 1 image and max 10
     if (!req.files || req.files.length === 0) {
@@ -49,17 +107,21 @@ export const createReport = expressAsyncHandler(async (req, res) => {
         })
     );
 
-    // Create the report with image IDs
-    const report = await Report.create({
-        user_id: userId,
-        description,
-        category_id,
-        anonymous: anonymous || false,
-        latitude,
-        longitude,
-        // images: imageDocs.map((img) => img._id),
-    });
+  // Create the report with image IDs
+  const report = await Report.create({
+    user_id: userId,
+    description,
+    category_id,
+    anonymous: anonymous || false,
+    latitude,
+    longitude,
+    // images: imageDocs.map((img) => img._id),
+  });
 
+  const user = userModel.findById(userId);
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
     // Update images with report_id reference
     await Promise.all(
         imageDocs.map((img) => {
@@ -68,21 +130,50 @@ export const createReport = expressAsyncHandler(async (req, res) => {
         })
     );
 
-    res.status(201).json({
-        status: true,
-        message: "Report created successfully",
-        data: report,
-    });
+  const history = await HistoryLogs.create({
+    report_id: report._id,
+    action: `Report created by ${user.name}`,
+  })
+
+  await sendEmail(
+    "New Report Created",
+    user.email,
+    `Hello ${user.name || ""},
+
+A new report has been successfully submitted on CivicTrack.
+
+Report Details:
+"${report.description}"
+
+Thank you for helping us keep our community informed.
+
+- CivicTrack Team`
+  );
+  // Update images with report_id reference
+  // await Promise.all(
+  //     imageDocs.map((img) => {
+  //         img.report_id = report._id;
+  //         return img.save();
+  //     })
+  // );
+
+  res.status(201).json({
+    status: true,
+    message: "Report created successfully",
+    data: report,
+  });
 });
+
 
 export const getReportById = expressAsyncHandler(async (req, res) => {
     const { reportId } = req.params;
     const report = await Report.findById(reportId).populate("images").populate("category_id").populate("user_id");
     if (!report) throw new AppError("Report not found", 404);
+    const reportsWithCounts = await addCountsToReports([report]);
     res.status(201).json({
         status: true,
         message: "Report Fetched",
-        data: report,
+        data: reportsWithCounts[0],
     });
 });
 
@@ -152,8 +243,8 @@ export const getReports = expressAsyncHandler(async (req, res) => {
         const d = calculateDistanceKm(latitude, longitude, report.latitude, report.longitude);
         return d <= distance;
     });
-
-    res.status(200).json({ status: true, count: filteredReports.length, data: filteredReports });
+    const reportsWithCounts = await addCountsToReports(filteredReports);
+    res.status(200).json({ status: true, count: filteredReports.length, data: reportsWithCounts });
 });
 
 export const myReports = expressAsyncHandler(async (req, res) => {
@@ -162,27 +253,67 @@ export const myReports = expressAsyncHandler(async (req, res) => {
         .populate("images")
         .populate("category_id")
         .sort({ createdAt: -1 });
-    res.status(200).json({ status: true, count: reports.length, data: reports });
+    const reportsWithCounts = await addCountsToReports(reports);
+    res.status(200).json({ status: true, count: reports.length, data: reportsWithCounts });
 });
-
 
 export const allReports = expressAsyncHandler(async (req, res) => {
     const reports = await Report.find().populate("images").populate("category_id").populate("user_id").sort({ createdAt: -1 });
-    res.status(200).json({ status: true, count: reports.length, data: reports });
+    const reportsWithCounts = await addCountsToReports(reports);
+    res.status(200).json({ status: true, count: reports.length, data: reportsWithCounts });
 });
-
 
 export const changeStatus = expressAsyncHandler(async (req, res) => {
-    const { reportId } = req.params;
-    const { status } = req.body;
-    const report = await Report.findById(reportId);
-    if (!report) return res.status(404).json({ status: false, message: "Report not found" });
-    if (status <= report.status) {
-        return res.status(400).json({ status: false, message: "New status must be greater than current status" });
-    }
-    report.status = status;
-    await report.save();
+  const { reportId } = req.params;
+  const { status } = req.body;
+  const report = await Report.findById(reportId);
+  if (!report)
+    return res.status(404).json({ status: false, message: "Report not found" });
+  if (status <= report.status) {
+    return res
+      .status(400)
+      .json({
+        status: false,
+        message: "New status must be greater than current status",
+      });
+  }
+  report.status = status;
+  await report.save();
 
-    res.status(200).json({ status: true, message: "Status updated successfully", data: report });
-});
+  const user = await userModel.findById(report.user_id);
 
+  
+  const history = await HistoryLogs.create({
+    report_id: report._id,
+    action: `Report created by ${user.name}`,
+  })
+
+  let msg = "";
+
+if (status === 2) {
+  msg = "The report has been marked as 'In Progress'. Our team is actively working on it and it will be resolved soon.";
+} else if (status === 3) {
+  msg = "The report has been marked as 'Completed'. It is now visible to the public.";
+}
+
+await sendEmail(
+  "Report Status Updated",
+  report.user.email,
+  `Hello ${user.name || "User"},
+
+${msg}
+
+Thank you for your contribution to CivicTrack.
+
+– CivicTrack Team`
+);
+
+
+  res
+    .status(200)
+    .json({
+      status: true,
+      message: "Status updated successfully",
+      data: report,
+    });
+})

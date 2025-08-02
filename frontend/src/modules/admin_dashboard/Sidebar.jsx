@@ -4,20 +4,18 @@ import { FaBars } from "react-icons/fa";
 import { PiChalkboardTeacherFill, PiStudent } from "react-icons/pi";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { SiGoogleclassroom } from "react-icons/si";
-import { useDispatch, useSelector } from "react-redux";
-import { addUser } from "../../../store/userSlice";
 import Cookies from "universal-cookie";
 import { CiSettings } from "react-icons/ci";
 
 const listData = [
   {
-    name: "Convenor",
+    name: "Reports",
     type: ["Admin"],
     icon: <PiChalkboardTeacherFill size={20} />,
     link: "/user/dashboard/faculties",
   },
   {
-    name: "Class",
+    name: "Users",
     type: ["Admin"],
     icon: <SiGoogleclassroom size={20} />,
     link: "/user/dashboard/class",
@@ -51,25 +49,25 @@ const listData = [
 export default function Sidebar({ open, setOpen }) {
   const [filteredListData, setFilteredListData] = useState(listData);
   const location = useLocation();
-  const dispatch = useDispatch();
   const cookie = new Cookies();
   const navigate = useNavigate();
-  const user = useSelector((state) => state.user);
 
   const signOut = () => {
     cookie.remove("user_token", { path: "/" });
+    localStorage.removeItem("user"); // assuming you stored user info here
     navigate("/user/login");
-    dispatch(addUser(null));
   };
 
   useEffect(() => {
-    if (user) {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
       const filteredData = listData.filter((item) =>
-        item.type.includes(user.user_type)
+        item.type.includes(parsedUser?.user_type)
       );
       setFilteredListData(filteredData);
     }
-  }, [user]);
+  }, []);
 
   return (
     <div className="relative min-h-full text-stone-700">
@@ -79,16 +77,6 @@ export default function Sidebar({ open, setOpen }) {
           onClick={() => setOpen((prev) => !prev)}
           className="sticky cursor-pointer md:hidden bottom-2 hover:text-slate-500"
         />
-        <Link to={"/"} className="flex">
-          <img
-            src={
-              "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS0chhs7PCMWtuhOLg8yYBynOz2qsPmX_ydmCJwci-rkpfXh47lW_2YRRgT7skeD8INGrA&usqp=CAU"
-            }
-            alt="pcte"
-            className="object-cover w-8 h-8 rounded-"
-          />
-          {open && "Koshish"}
-        </Link>
       </div>
 
       <div className="flex flex-col gap-2 mt-5">
@@ -97,14 +85,10 @@ export default function Sidebar({ open, setOpen }) {
             to={item.link}
             key={index}
             onClick={() => setOpen(false)}
-            className={` 
+            className={`
               ${item.link === location.pathname ? "bg-red-800 text-white" : ""}
-              rounded-md
-              p-2 
-              transition-all
-              cursor-pointer
-              hover:bg-gradient-to-r hover:bg-red-900
-              hover:text-white
+              rounded-md p-2 transition-all cursor-pointer
+              hover:bg-gradient-to-r hover:bg-red-900 hover:text-white
               font-semibold flex items-center gap-3
               ${!open ? "w-fit" : "w-full"}
             `}
@@ -118,7 +102,7 @@ export default function Sidebar({ open, setOpen }) {
       <div
         title="logout"
         onClick={signOut}
-        className={`lg:absolute lg:bottom-3 ${!open ? "w-fit" : "w-[80%]"} 
+        className={`lg:absolute lg:bottom-3 ${!open ? "w-fit" : "w-[80%]"}
           font-medium flex items-center gap-4
           cursor-pointer
           py-3 px-2 rounded-md 

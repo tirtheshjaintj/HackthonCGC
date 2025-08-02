@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { FaBars } from 'react-icons/fa6'
-import Sidebar from "../SideBar/Sidebar"
+import Sidebar from "./Sidebar"
 import { Outlet } from 'react-router-dom'
 
 // Student Dashboard
-export default function Dashboard() {
+export default function AdminDashboard() {
   const [open, setOpen] = useState(true)
 
 

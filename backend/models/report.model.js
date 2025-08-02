@@ -48,6 +48,11 @@ const reportSchema = new Schema(
                 ref: "Image",
             }
         ],
+        hidden:{
+            type: Boolean,
+            default: false
+        },
+        
     },
     {
         timestamps: true,
