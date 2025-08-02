@@ -55,9 +55,9 @@ export const googleSignIn = async (req, res) => {
       });
     }
 
-    
+
     const generatedUsername = email.split("@")[0] + Math.floor(Math.random() * 1000);
-    const userPhone = "0000000000"; 
+    const userPhone = "0000000000";
 
     user = await userModel.create({
       email,

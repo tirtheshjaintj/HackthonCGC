@@ -55,9 +55,9 @@ const userSchema = new Schema(
       unique: true,
       sparse: true,
     },
-    avatar:{
+    avatar: {
       type: String,
-      default:"https://imgs.search.brave.com/8COzZiqruIekL2ihFd4kJK1wDWAQSgIrdmENvJLpNjM/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jZG4u/dmVjdG9yc3RvY2su/Y29tL2kvNTAwcC8w/Ni8zMi9zb2NpYWwt/bmV0d29yay1kZWZh/dWx0LXByb2ZpbGUt/cGljdHVyZS1hdmF0/YXItaWNvbi12ZWN0/b3ItNTcxMjA2MzIu/anBn"
+      default: "https://imgs.search.brave.com/8COzZiqruIekL2ihFd4kJK1wDWAQSgIrdmENvJLpNjM/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jZG4u/dmVjdG9yc3RvY2su/Y29tL2kvNTAwcC8w/Ni8zMi9zb2NpYWwt/bmV0d29yay1kZWZh/dWx0LXByb2ZpbGUt/cGljdHVyZS1hdmF0/YXItaWNvbi12ZWN0/b3ItNTcxMjA2MzIu/anBn"
     },
     isActive: {
       type: Boolean,
@@ -91,5 +91,5 @@ userSchema.methods.generateJWT = function () {
   );
 };
 
-const userModel = model("user", userSchema);
+const userModel = model("User", userSchema);
 export default userModel;
