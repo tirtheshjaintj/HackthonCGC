@@ -8,7 +8,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Login from "./modules/auth/Login";
  import HomePage from "./modules/home/pages/HomePage";
 import NotFoundPage from './modules/home/pages/NotFound.jsx';
-import CreateReport from './modules/home/pages/CreateReport.jsx';
+import CreateReport from './modules/CreateReport.jsx';
 import SignUp from './modules/auth/SignUp.jsx';
 import ReportDetails from './modules/ReportDetails/ReportDetails.jsx';
 

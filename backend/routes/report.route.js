@@ -1,5 +1,6 @@
 import { Router } from "express";
-import { allReports, changeStatus, createReport, editReport, getLogs, getReportById, getReports, myReports  } from "../controllers/report.controller.js";
+import { allReports, changeStatus, createReport, editReport, getCategories, getReportById, getReports, myReports } from "../controllers/report.controller.js";
+
 import { createReportValidator } from "../validators/report.validator.js";
 import validate from "../middlewares/validate.js";
 import upload from "../middlewares/multer.js";
@@ -18,13 +19,14 @@ reportRouter.post(
 
 reportRouter.post("/edit/:reportId", upload.array("files", 10), authcheck, editReport);
 reportRouter.post("/nearby", getReports);
+reportRouter.get("/categories", getCategories);
 reportRouter.get("/my", authcheck, myReports);
-reportRouter.get("/id/:reportId", authcheck, getReportById);
+reportRouter.get("/id/:reportId", getReportById);
 
 //Admin Ones
 reportRouter.get("/all", authcheckAdmin, allReports);
 reportRouter.post("/status/:reportId", authcheckAdmin, changeStatus);
 
-reportRouter.get('/logs/:reportId' , getLogs);
+reportRouter.get('/logs/:reportId', getLogs);
 
 export default reportRouter;

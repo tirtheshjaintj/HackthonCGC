@@ -68,7 +68,7 @@ export const GoogleSignIn = asynchandler(async (req, res) => {
       name: name,
       avatar: picture,
       gid: sub,
-       username: username,
+      username: username,
     });
     await newUser.save();
 

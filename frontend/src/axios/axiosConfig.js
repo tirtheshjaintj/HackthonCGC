@@ -15,6 +15,7 @@ axiosRetry(axiosInstance, {
   shouldResetTimeout: true,
 });
 
+
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = getCookie("authToken");

@@ -13,21 +13,20 @@ export const authcheck = async (req, res, next) => {
     }
 
     // Check cookie token
-    if (req.cookies && req.cookies.user_token) {
-        token = req.cookies.user_token;
+    if (req.cookies && req.cookies.authToken) {
+        token = req.cookies.authToken;
         console.log(token);
     }
 
-    console.log(req.cookies);
+    console.log("cookies", req.cookies);
 
     if (!token) throw new AppError("Not Authorized", 401);
 
     const user = getUser(token);
     if (!user) throw new AppError("Not Authorized", 401);
-
     const verified_user = await UserModel.findOne({ _id: user._id, isActive: true }).lean();
+    console.log(verified_user);
     if (!verified_user) throw new AppError("Not Authorized", 401);
-
     verified_user.password = "HIDDEN"; // Hide password
     req.user = verified_user;
 

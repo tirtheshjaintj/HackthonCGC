@@ -11,5 +11,4 @@ export const createReportValidator = [
     body("longitude")
         .isFloat({ min: -180, max: 180 })
         .withMessage("Longitude must be between -180 and 180"),
-    body("category_id").isMongoId().withMessage("Not valid category ID"),
 ];

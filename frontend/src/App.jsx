@@ -1,7 +1,4 @@
 import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
   useNavigate,
   Outlet,
 } from "react-router-dom";
@@ -17,12 +14,12 @@ import { Toaster } from "react-hot-toast";
 
 const routes = [
   {
-    path:'/',
-    element:<HomePage/>
+    path: '/',
+    element: <HomePage />
   },
   {
-    path:'/report/:reportId',
-    element:<ReportDetails/>
+    path: '/report/:reportId',
+    element: <ReportDetails />
   }
 ]
 

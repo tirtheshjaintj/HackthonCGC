@@ -4,7 +4,6 @@ import Image from "../models/image.model.js";
 import Category from "../models/category.model.js";
 import userModel from "../models/user.model.js";
 import { AppError } from "../helpers/error.helper.js";
-import User from "../../../DhanRakshak/server/models/User.js";
 import { sendEmail } from "../helpers/mail.helper.js";
 import HistoryLogs from "../models/historylogs.model.js";
 import uploadToCloud from "../helpers/cloud.helper.js";
@@ -71,24 +70,6 @@ export const createReport = expressAsyncHandler(async (req, res) => {
     const userId = req.user?._id || req.body.user_id; // adapt for auth
 
     // Ensure at least 1 image and max 10
-    // if (!req.files || req.files.length === 0) {
-    //     return res.status(400).json({ status: false, message: "At least one image is required" });
-    // }
-
-    // if (req.files.length > 10) {
-    //     return res.status(400).json({ status: false, message: "Maximum 10 images allowed" });
-    // }
-
-    // Create image documents
-    // const imageDocs = await Promise.all(
-    //     req.files.map(async (file) => {
-    //         return await Image.create({
-    //             report_id: null, // will link after report is created
-    //             image_url: file.path, // or file.location if using S3
-    //         });
-    //     })
-
-    // Ensure at least 1 image and max 10
     if (!req.files || req.files.length === 0) {
         return res.status(400).json({ status: false, message: "At least one image is required" });
     }
@@ -115,7 +96,7 @@ export const createReport = expressAsyncHandler(async (req, res) => {
         anonymous: anonymous || false,
         latitude,
         longitude,
-        // images: imageDocs.map((img) => img._id),
+        images: imageDocs.map((img) => img._id),
     });
 
     const user = userModel.findById(userId);
@@ -150,12 +131,12 @@ Thank you for helping us keep our community informed.
 - CivicTrack Team`
     );
     // Update images with report_id reference
-    // await Promise.all(
-    //     imageDocs.map((img) => {
-    //         img.report_id = report._id;
-    //         return img.save();
-    //     })
-    // );
+    await Promise.all(
+        imageDocs.map((img) => {
+            img.report_id = report._id;
+            return img.save();
+        })
+    );
 
     res.status(201).json({
         status: true,
@@ -238,7 +219,7 @@ export const getReports = expressAsyncHandler(async (req, res) => {
     const { latitude, longitude, distance = 50 } = req.body;
     const validDistance = [1, 3, 5 , 50];
     if (!validDistance.includes(distance)) throw new AppError("Not Valid Distance", 401);
-    const reports = await Report.find({hidden:false}).populate("images").populate("category_id").populate("user_id");
+    const reports = await Report.find({ hidden: false }).populate("images").populate("category_id").populate("user_id");
     const filteredReports = reports.filter((report) => {
         const d = calculateDistanceKm(latitude, longitude, report.latitude, report.longitude);
         return d <= distance;
@@ -267,55 +248,67 @@ export const changeStatus = expressAsyncHandler(async (req, res) => {
     const { reportId } = req.params;
     const { status } = req.body;
     const report = await Report.findById(reportId);
-    if (!report) return res.status(404).json({ status: false, message: "Report not found" });
+    if (!report)
+        return res.status(404).json({ status: false, message: "Report not found" });
     if (status <= report.status) {
-        return res.status(400).json({ status: false, message: "New status must be greater than current status" });
+        return res
+            .status(400)
+            .json({
+                status: false,
+                message: "New status must be greater than current status",
+            });
     }
     report.status = status;
     await report.save();
 
-  const history = await HistoryLogs.create({
-    report_id: report._id,
-    action: `Report created by ${user.name}`,
-  })
+    const user = await userModel.findById(report.user_id);
 
-  let msg = "";
+
+    const history = await HistoryLogs.create({
+        report_id: report._id,
+        action: `Report created by ${user.name}`,
+    })
+
+    let msg = "";
 
     if (status === 2) {
-    msg = "The report has been marked as 'In Progress'. Our team is actively working on it and it will be resolved soon.";
+        msg = "The report has been marked as 'In Progress'. Our team is actively working on it and it will be resolved soon.";
     } else if (status === 3) {
-    msg = "The report has been marked as 'Completed'. It is now visible to the public.";
+        msg = "The report has been marked as 'Completed'. It is now visible to the public.";
     }
 
     await sendEmail(
-    "Report Status Updated",
-    report.user.email,
-    `Hello ${user.name || "User"},
+        "Report Status Updated",
+        report.user.email,
+        `Hello ${user.name || "User"},
 
-    ${msg}
+${msg}
 
-    Thank you for your contribution to CivicTrack.
+Thank you for your contribution to CivicTrack.
 
-    – CivicTrack Team`
+– CivicTrack Team`
     );
 
 
-  res
-    .status(200)
-    .json({
-      status: true,
-      message: "Status updated successfully",
-      data: report,
-    });
-
+    res.status(200)
+        .json({
+            status: true,
+            message: "Status updated successfully",
+            data: report,
+        });
 });
 
-  
+export const getCategories = expressAsyncHandler(async (req, res) => {
+    const categories = await Category.find({ active: true });
+    res.json({ status: true, message: "Status updated successfully", data: categories });
+});
+
+
 
 
 
 export const getLogs = expressAsyncHandler(async (req, res) => {
-  const { reportId } = req.params;
-  const logs = await HistoryLogs.find({ report_id: reportId }).sort({ createdAt: -1 });
-  res.status(200).json({ status: true, data: logs });
+    const { reportId } = req.params;
+    const logs = await HistoryLogs.find({ report_id: reportId }).sort({ createdAt: -1 });
+    res.status(200).json({ status: true, data: logs });
 });
