@@ -3,8 +3,8 @@ import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 
 import { Link, useNavigate } from "react-router-dom";
- import PasswordInp from "../../components/Auths/PasswordInp";
- import Loader from "../../components/Loader"
+import PasswordInp from "../../components/Auths/PasswordInp";
+import Loader from "../../components/Loader"
 import useAuthStore from "../../store/authSlice/authSlice";
 import { getCookie, setCookie } from "../../axios/cookieFunc";
 import axiosInstance from "../../axios/axiosConfig";
@@ -17,7 +17,7 @@ const Login = () => {
   });
   const { user, setUser } = useAuthStore((state) => state);
   const [loading, setLoading] = useState(false);
- 
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setData({
@@ -99,7 +99,7 @@ const Login = () => {
           <form className="w-full" onSubmit={(e) => handleSubmit(e)}>
             <input
               className="w-full my-2 p-2 px-3  outline-none rounded-md bg-gray-50 dark:bg-stone-800 dark:text-gray-50 "
-              type="email"
+              type="text"
               autoComplete="off"
               onChange={handleChange}
               name="email"

@@ -24,7 +24,7 @@ const AdminLogin = () => {
       const response = await axiosInstance.post('/admin/login', formData);
       if (response.data) {
         toast.success('Login successful!');
-        setCookie('token' , response.token)
+        setCookie('token', response.token)
         navigate('/admin/dashboard'); // change to your target page
       } else {
         toast.error(response.data.message || 'Login failed');

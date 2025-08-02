@@ -4,8 +4,8 @@ import './index.css'
 import App from './App.jsx';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import Register from "./modules/auth/Register";
-import VerifyOtp from "./modules/auth/VerifyOtp";
+// import Register from "./modules/auth/Register";
+// import VerifyOtp from "./modules/auth/VerifyOtp";
 import Login from "./modules/auth/Login";
 import AdminLogin from "./modules/adminAuth/Login";
 import HomePage from "./modules/home/pages/HomePage";
