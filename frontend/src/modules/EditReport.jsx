@@ -2,10 +2,10 @@ import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import { FaImage, FaTimes } from "react-icons/fa";
 import toast from "react-hot-toast";
-import usePageSetup from "../../../hooks/UsePageSetup";
-import axiosInstance from "../../../axios/axiosConfig";
+import usePageSetup from "../hooks/UsePageSetup";
+import axiosInstance from "../axios/axiosConfig";
 
-function CreateReport() {
+function EditReport() {
     usePageSetup("Create New Report");
 
     const [reportDetails, setReportDetails] = useState({
@@ -15,7 +15,7 @@ function CreateReport() {
     });
 
     const [categories, setCategories] = useState([]);
-
+    const [loading, setLoading] = useState(false);
     const [imageFiles, setImageFiles] = useState([]);
     const [location, setLocation] = useState({
         lat: null,
@@ -87,10 +87,11 @@ function CreateReport() {
         }
 
         try {
+            setLoading(true);
             const formData = new FormData();
             formData.append("description", reportDetails.description);
             formData.append("anonymous", reportDetails.anonymous);
-            formData.append("category", reportDetails.category);
+            formData.append("category_id", reportDetails.category);
             formData.append("latitude", location.lat);
             formData.append("longitude", location.lng);
 
@@ -101,7 +102,6 @@ function CreateReport() {
             await axiosInstance.post("/report", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
-                    "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2ODhkYWM4NTBkODY1Zjc2NDVlZmI4OTQiLCJlbWFpbCI6InRpcnRoZXNoamFpbnRqQGdtYWlsLmNvbSIsInVzZXJuYW1lIjoiVGlydGhlc2hKYWluIiwiaWF0IjoxNzU0MTE1NDQ3LCJleHAiOjE3ODU2NzMwNDd9.IxjT-ci20V_a6-e7P55cyev8mHEI9K8JLmxEvkhQCl4"
                 },
             });
             toast.success("Report Created Successfully!");
@@ -114,6 +114,8 @@ function CreateReport() {
         } catch (err) {
             console.log(err);
             toast.error("Failed to submit the report.");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -251,14 +253,14 @@ function CreateReport() {
                 {/* Submit */}
                 <button
                     type="submit"
-                    disabled={!isLocationReady}
-                    className="px-6 py-3 float-right bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold"
+                    disabled={!isLocationReady || loading}
+                    className="px-6 flex gap-2 py-3 float-right bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold"
                 >
-                    Submit Report
+                    {loading ? <div className="spinner" ></div> : "Submit Report"}
                 </button>
             </form>
         </motion.div>
     );
 }
 
-export default CreateReport;
+export default EditReport;
