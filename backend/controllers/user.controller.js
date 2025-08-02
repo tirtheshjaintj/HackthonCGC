@@ -1,219 +1,248 @@
-import userModel from "../models/user.model.js";
+// import { uploadToCloudinary } from "../utils/cloudinary.js";
+import jwt from "jsonwebtoken";
 import { OAuth2Client } from "google-auth-library";
-import { sendOtpEmail } from "../utils/utils.js";
-import { sendOTP } from "../helpers/mail.helper.js";
+// import sendEmail from '../service/sendMail.js';
+import asynchandler from "express-async-handler";
+import User from "../models/user.model.js";
 
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const getToken = (user, exp = null) => {
+  return jwt.sign(
+    {
+      _id: user._id,
+      email: user.email,
+      name: user.name,
+    },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: exp ? exp : "1d",
+    }
+  );
+};
 
-export const verifyGoogleToken = async (token) => {
+// ============================== GOOGLE SIGNIN =====================================
+// Verify Google token function
+const client = new OAuth2Client(process.env.G_CLIENT_ID);
+
+const verifyGoogleToken = async (token) => {
   try {
     const ticket = await client.verifyIdToken({
       idToken: token,
-      audience: process.env.GOOGLE_CLIENT_ID,
+      audience: process.env.G_CLIENT_ID,
     });
-    return ticket.getPayload(); // returns { email, name, picture, sub, ... }
+    const payload = ticket.getPayload();
+    return payload;
   } catch (error) {
-    console.error("Error verifying Google token:", error);
-    throw new Error("Invalid Google token");
+    console.error("Error verifying token", error);
+    throw new Error("Invalid token");
   }
 };
 
+export const GoogleSignIn = asynchandler(async (req, res) => {
+  const { tokenId } = req.body;
 
-export const googleSignIn = async (req, res) => {
   try {
-    const { tokenId } = req.body;
-
-    if (!tokenId) {
-      return res.status(400).json({ message: "Token ID is required" });
-    }
-
     const googleUser = await verifyGoogleToken(tokenId);
-    const { email, name, sub, picture } = googleUser;
+    const { email, name, picture, sub } = googleUser;
 
-    if (!email || !name || !sub) {
-      return res.status(400).json({ message: "Missing Google user info" });
-    }
+    if (!email || !name || !sub)
+      return res.status(400).json({ message: "All fields are required" });
 
-    let user = await userModel.findOne({ email });
+    const getUser = await User.findOne({ email }).select("-password");
 
-    if (user) {
-      if (!user.google_id) {
-        user.google_id = sub;
-        await user.save();
+    if (getUser) {
+      if (!getUser.gid) {
+        getUser.gid = sub;
+        await getUser.save();
       }
+      const token = getToken(getUser);
 
-      const token = user.generateJWT();
       return res.status(200).json({
-        message: "User already exists. Logged in successfully.",
-        user: {
-          _id: user._id,
-          email: user.email,
-          username: user.username,
-          avatar: user.avatar,
-        },
-        token,
+        message: "Account already exists, logged in successfully",
+        user: getUser,
+        token: token,
       });
     }
 
-
-    const generatedUsername = email.split("@")[0] + Math.floor(Math.random() * 1000);
-    const userPhone = "0000000000";
-
-    user = await userModel.create({
+    const newUser = new User({
       email,
-      username: generatedUsername,
-      phone: userPhone,
-      google_id: sub,
+      name: name,
       avatar: picture,
-      password: sub,
+      gid: sub,
+       username: username,
     });
+    await newUser.save();
 
-    const token = user.generateJWT();
+    const token = getToken(newUser);
 
-    return res.status(201).json({
-      message: "Account created via Google",
-      user: {
-        _id: user._id,
-        email: user.email,
-        username: user.username,
-        avatar: user.avatar,
-      },
-      token,
+    const userObject = newUser.toObject();
+    delete userObject.password;
+    res.status(201).json({
+      message: "Account created successfully",
+      user: newUser,
+      token: token,
     });
   } catch (error) {
-    console.error("Google Sign-In Error:", error);
-    res.status(500).json({ message: error.message || "Google Sign-In failed" });
+    console.error("Error during Google sign-in:", error);
+    res.status(500).json({ message: "Something went wrong while registering" });
   }
+});
+
+// ===================================================================
+const generateUniqueUsername = (name) => {
+  const firstName = name.split(" ")[0];
+
+  const base = `${firstName}`;
+
+  // Replace all non-alphanumeric or underscore characters
+  const sanitizedBase = base.replace(/[^a-zA-Z0-9_]/g, "");
+
+  const randomSuffix = Math.floor(1000 + Math.random() * 9000); // 4-digit random number
+  return `${sanitizedBase}_${randomSuffix}`.toLowerCase();
 };
 
+// Manual Register
+export const registerUser = asynchandler(async (req, res) => {
+  const { email, password, name } = req.body;
 
-export const initiateRegister = async (req, res) => {
+  if (!email || !password || !name)
+    return res.status(400).json({ message: "All Fields are required" });
+  const getUser = await User.findOne({ email: email });
+  if (getUser)
+    return res
+      .status(400)
+      .json({ message: "Account already exists, Kindly login" });
+
+  const username = generateUniqueUsername(email, name);
+
+  const newUser = new User({
+    email,
+    password,
+    name,
+    username: username,
+  });
+  await newUser.save();
+
+  if (!newUser) return res.status(500).json({ message: "Invalid User Data" });
+
+  const token = getToken(newUser);
+
+  const userObject = newUser.toObject();
+  delete userObject.password;
+  res
+    .status(201)
+    .json({ message: "Account created ", token: token, user: newUser });
+});
+
+// Login
+export const loginUser = asynchandler(async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password)
+    return res.status(400).json({ message: "All Fields are required" });
+  const finduser = await User.findOne({ email: email });
+  if (!finduser)
+    return res.status(400).json({ message: "Account does not exist" });
+
+  const match = await finduser.isPasswordCorrect(password);
+
+  if (!match) return res.status(401).json({ message: "Invalid credentials" });
+  const token = getToken(finduser);
+
+  const userObject = finduser.toObject();
+  delete userObject.password;
+
+  res
+    .status(200)
+    .json({ message: "Welcome Back 🎉", token: token, user: userObject });
+});
+
+// export const updateAvatar = async (req, res) => {
+//   try {
+//     const userId = req.user._id;
+//     const avatarPath = req.file.path;
+
+//     const avatar = await uploadToCloudinary(avatarPath);
+
+//     if (!avatar) {
+//       return res.status(500).json({ message: "Avatar upload failed" });
+//     }
+
+//     const updatedUser = await User.findByIdAndUpdate(
+//       userId,
+//       { avatar: avatar.secure_url },
+//       { new: true }
+//     ).select("-password");
+
+//     if (!updatedUser) {
+//       return res.status(404).json({ message: "User not found" });
+//     }
+
+//     res.status(200).json({
+//       message: "Avatar updated successfully",
+//       user: updatedUser,
+//     });
+
+//   } catch (error) {
+//     res.status(500).json({ message: "Internal server error", error: error.message });
+//   }
+// };
+
+// export const updateUser = async (req, res) => {
+//   try {
+//     const userId = req.user._id;
+//     const { name, skills, bio, achievements, links, address } = req.body;
+
+//     const updatedUser = await User.findByIdAndUpdate(
+//       userId,
+//       { name, skills, bio, achievements, links, address },
+//       { new: true }
+//     ).select("-password");
+
+//     if (!updatedUser) {
+//       return res.status(404).json({ message: "User not found" });
+//     }
+
+//     res.status(200).json({
+//       message: "User updated successfully",
+//       user: updatedUser,
+//     });
+//   } catch (error) {
+//     res.status(500).json({ message: "Internal server error", error: error.message });
+//   }
+// };
+
+export const verifyUserToken = asynchandler(async (req, res) => {
   try {
-    const { username = null, phone = null, email = null, password = null } = req.body || {};
+    const token = req.header("Authorization")?.replace("Bearer ", "");
 
-    if (!username || !phone || !email || !password) {
-      return res.status(400).json({ message: "All fields are required" });
+    if (!token) {
+      res.status(401).json({ message: "Unauthorized request" });
+    }
+    let decodedToken;
+    try {
+      decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (error) {
+      console.log(error);
+      return res.status(401).json({
+        message: "Your Session has been expired",
+        expiredSession: true,
+      });
+    }
+    if (!decodedToken) {
+      return res.status(401).json({
+        message: "Your Session has been expired",
+        expiredSession: true,
+      });
     }
 
-    const existingUser = await userModel.findOne({
-      $or: [{ email }, { username }, { phone }],
-    });
-
-    if (existingUser) {
-      return res.status(409).json({ message: "User already exists" });
-    }
-
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-
-    const user = await userModel.create({
-      username,
-      phone,
-      email,
-      password,
-      otp,
-    });
-
-    const emailSent = await sendOTP(email, otp);
-
-    if (!emailSent) {
-      await userModel.findByIdAndDelete(user._id); // cleanup
-      return res.status(500).json({ message: "Failed to send OTP" });
-    }
-
-    res.status(200).json({ message: "OTP sent to email", email });
-  } catch (error) {
-    console.error("Initiate Register Error:", error);
-    res.status(500).json({ message: "Error initiating registration" });
-  }
-};
-
-
-export const verifyOtp = async (req, res) => {
-  try {
-    const { email, otp } = req.body;
-
-    if (!email || !otp) {
-      return res.status(400).json({ message: "Email and OTP are required." });
-    }
-
-    const user = await userModel.findOne({ email });
+    const user = await User.findById(decodedToken._id).select("-password");
 
     if (!user) {
-      return res.status(404).json({ message: "User not found." });
+      res.status(401).json({ message: "Invalid token" });
     }
 
-    // Optional: Check OTP expiry
-    if (user.otpExpires && user.otpExpires < Date.now()) {
-      return res.status(400).json({ message: "OTP has expired." });
-    }
-
-    if (user.otp !== otp) {
-      return res.status(401).json({ message: "Invalid OTP." });
-    }
-
-    user.isActive = true;
-    user.otp = undefined; // Optional: remove OTP after verification
-    user.otpExpires = undefined; // Optional
-    await user.save();
-
-    return res.status(200).json({ message: "OTP verified. User activated." });
-
-  } catch (err) {
-    console.error("Error verifying OTP:", err);
-    return res.status(500).json({ message: "Internal server error" });
-  }
-};
-
-export const login = async (req, res) => {
-  try {
-    const { username, password } = req.body;
-
-    if (!username || !password) {
-      return res.status(400).json({ message: "Username and password required" });
-    }
-
-    const user = await userModel.findOne({
-      $or: [ { username: username }],
-      isActive:true
-    });
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    const isMatch = await user.isPasswordCorrect(password);
-
-    if (!isMatch) {
-      return res.status(401).json({ message: "Invalid password" });
-    }
-
-    const token = user.generateJWT();
-
-    res.status(200).json({
-      message: "Login successful",
-      user: {
-        _id: user._id,
-        username: user.username,
-        email: user.email,
-        phone: user.phone,
-        avatar: user.avatar,
-      },
-      token,
-    });
+    res.status(200).json({ user: user });
   } catch (error) {
-    console.error("Login Error:", error);
-    res.status(500).json({ message: "Server error during login" });
+    res.status(500).json({ message: "Invalid access token" });
   }
-};
-
-
-
-export const getAllUsers = async (req, res) => {
-  try {
-    const users = await userModel.find();
-    res.status(200).json({ users });
-  } catch (error) {
-    console.error("Error fetching users:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-};
+});

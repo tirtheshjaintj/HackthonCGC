@@ -1,23 +1,36 @@
-import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import { toast } from "react-hot-toast";
 
 import { Link, useNavigate } from "react-router-dom";
- import PasswordInp from "../../components/Auths/PasswordInp";
- import Loader from "../../components/Loader"
-import useAuthStore from "../../store/authSlice/authSlice";
-import { getCookie, setCookie } from "../../axios/cookieFunc";
+// import sign from './sign.png'
+import Cookies from "universal-cookie";
+ import Loader from "../../components/Loader";
+import PasswordInp from "../../components/Auths/PasswordInp";
+ import useAuthStore from "../../store/authSlice/authSlice";
 import axiosInstance from "../../axios/axiosConfig";
+const cookies = new Cookies(null, { path: "/" });
 
-const Login = () => {
+const SignUp = () => {
   const navigate = useNavigate();
+
+  const [loading, setLoading] = useState(false);
+  const { user, setUser } = useAuthStore((state) => state);
+
   const [data, setData] = useState({
     email: "",
     password: "",
-  });
-  const { user, setUser } = useAuthStore((state) => state);
-  const [loading, setLoading] = useState(false);
- 
+    name: "",
+   });
+
+  // Route protection if log In is true
+  useEffect(() => {
+    const token = cookies.get("authToken");
+    if (token || user) {
+      navigate("/");
+    }
+  }, []);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setData({
@@ -25,18 +38,37 @@ const Login = () => {
       [name]: value,
     });
   };
-  useEffect(() => {
-    const token = getCookie("authToken");
-    if (user || token) {
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const res = await axiosInstance.post(`/user/register`, {
+        ...data,
+      });
+
+    //   console.log(res);
+      toast.success(res?.data?.message || "Success");
+      cookies.set("authToken", res?.data?.token);
+      setUser({
+        user: res?.data?.user,
+        accessToken: res?.data?.token,
+      });
       navigate("/");
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Something went wrong");
+      console.log(error);
+    } finally {
+      setLoading(false);
     }
-  }, []);
+  };
 
   const handleGoogleLoginFailure = async (error) => {
     toast.error("Something went wrong please try again");
     console.log(error);
   };
   const handleGoogleLoginSuccess = async (response) => {
+    console.log(response);
     if (!response.credential) return console.log("Login Failed");
     try {
       setLoading(true);
@@ -44,9 +76,8 @@ const Login = () => {
         tokenId: response.credential,
       });
 
-      toast.success(res?.data.message || "Success");
-
-      setCookie("authToken", res?.data?.token);
+      toast.success(res?.data?.message || "Success");
+      cookies.set("authToken", res?.data?.token);
       setUser({
         user: res?.data?.user,
         accessToken: res?.data?.token,
@@ -59,31 +90,10 @@ const Login = () => {
       setLoading(false);
     }
   };
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      const res = await axiosInstance.post(`/user/login`, {
-        ...data,
-      });
-      toast.success(res?.data?.message || "Success");
-      console.log(res);
-      setCookie("authToken", res?.data?.token);
-      setUser({
-        user: res?.data?.user,
-        accessToken: res?.data?.token,
-      });
-      navigate("/");
-    } catch (error) {
-      toast.error(error?.response?.data?.message || "Something went wrong");
-      console.log(error);
-    } finally {
-      setLoading(false);
-    }
-  };
+
   return (
     <div className="">
-      {/* <div className="fixed  z-50  top-0 w-full bg-white dark:bg-stone-900">
+      {/* <div className="fixed z-50 top-0 w-full bg-white dark:bg-stone-900">
         <Navbar />
       </div> */}
 
@@ -93,45 +103,47 @@ const Login = () => {
           style={{ boxShadow: "rgba(0, 0, 0, 0.35) 0px 2px 10px" }}
         >
           <h1 className="text-center text-2xl font-bold text-gray-800 dark:text-gray-100 my-4">
-            Welcome Back 👋
+            Sign Up
           </h1>
 
-          <form className="w-full" onSubmit={(e) => handleSubmit(e)}>
+          <form className="w-full " onSubmit={(e) => handleSubmit(e)}>
+            <input
+              className="w-full my-2 p-2 px-3 outline-none rounded-md bg-gray-50 dark:bg-stone-800 dark:text-gray-50 "
+              type="text"
+              onChange={handleChange}
+              name="name"
+              placeholder="Full Name"
+              required
+            />
+            <br />
             <input
               className="w-full my-2 p-2 px-3  outline-none rounded-md bg-gray-50 dark:bg-stone-800 dark:text-gray-50 "
               type="email"
-              autoComplete="off"
               onChange={handleChange}
               name="email"
-              id="email"
               placeholder="Email"
               required
             />
-
+     
             <PasswordInp
               onChange={handleChange}
               placeholder={"Password"}
               name={"password"}
             />
-            <Link
-              to="/forgot/password"
-              className="text-blue-800 text-xs px-2 font-semibold"
-            >
-              Forgot password ?
-            </Link>
+
             <button
               type="submit"
               disabled={loading}
               className="bg-blue-600 rounded-full inline-flex justify-center  mx-auto w-full mt-3 max-w-[500px] hover:bg-blue-400 text-white p-1 py-2 px-3"
             >
-              {loading ? <Loader /> : "Log In"}
+              {loading ? <Loader /> : "Sign Up"}
             </button>
 
             <div className="text-center my-4 gap-1 flex items-center justify-center text-xs dark:text-gray-100">
-              Not Having Account?{" "}
-              <Link to="/signup" className="text-blue-800 font-semibold">
-                SignUp here
-              </Link>{" "}
+              Already Having an Account?{" "}
+              <Link to="/login" className="text-blue-900  font-semibold">
+                Login here
+              </Link>
             </div>
           </form>
 
@@ -142,7 +154,7 @@ const Login = () => {
           </div>
 
           <GoogleOAuthProvider clientId="702829994495-pfp4ughca3dhaio31i8qj372b9rg595f.apps.googleusercontent.com">
-            <div className="md:w-[450px] min-w-full max-sm:w-[260px] border-none  rounded-full mx-auto">
+            <div className="md:w-[450px] max-sm:w-[260px] border-none  rounded-full mx-auto">
               <div className="mt-4  rounded-full dark:bg-stone-800">
                 <GoogleLogin
                   theme={"filled_white"}
@@ -155,8 +167,7 @@ const Login = () => {
         </div>
       </div>
     </div>
-    // </div>
   );
 };
 
-export default Login;
+export default SignUp;
