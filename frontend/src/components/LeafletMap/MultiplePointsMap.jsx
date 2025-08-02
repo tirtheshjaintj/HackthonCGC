@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, LayersControl } from 'react-lea
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { IoMdLocate } from "react-icons/io";
+import { useNavigate } from 'react-router-dom';
 
 // Fix Leaflet default marker icon paths
 delete L.Icon.Default.prototype._getIconUrl;
@@ -46,6 +47,7 @@ const MultiplePointsMap = ({data = [
   const [userPosition, setUserPosition] = useState(null);
   const [error, setError] = useState(null);
   const mapRef = useRef();
+  const navigate = useNavigate();
 
   const fetchIpLocation = async () => {
     try {
@@ -123,7 +125,8 @@ const MultiplePointsMap = ({data = [
           {data.map((item, index) => (
             <Marker key={index} position={[item.latitude, item.longitude]} eventHandlers={{
       click: () => {
-        console.log("Clicked marker:", item);
+        console.log("clicked")
+        navigate(`/report/${item.id}`);
       },
     }}>
               <Popup>

@@ -32,9 +32,11 @@ const port = process.env.PORT;
 import userRouter from "./routes/user.routes.js";
 import adminRouter from "./routes/admin.routes.js";
 import reportRouter from "./routes/report.route.js";
+import utilsRouter from "./routes/util.route.js"
 app.use("/user", userRouter);
 app.use("/admin", adminRouter);
 app.use("/report", reportRouter);
+app.use('/util' , utilsRouter);
 
 app.get("/", (req, res) => {
   return res.send("Working Fine");

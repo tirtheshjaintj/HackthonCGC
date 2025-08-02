@@ -69,7 +69,7 @@ export default function NavBar() {
             className="max-lg:hidden flex relative items-center gap-2 cursor-pointer"
           >
             <div className="min-w-7 min-h-7 rounded-full relative overflow-hidden">
-              <img src={"/"} alt="profile" className="w-7 h-7 object-cover" />
+              <img src={user?.avatar} alt="profile" className="w-7 h-7 object-cover" />
             </div>
             <p className="font-semibold truncate max-w-[100px] hover:opacity-80">
               {user?.name || user?.email}

@@ -6,7 +6,7 @@ import Upvote from "../models/upvote.model.js";
 
 export const toggleFlag = expressAsyncHandler(async (req, res) => {
     const { report_id } = req.params;
-    const { reason = "" } = req.body;
+    const { reason = "reason" } = req.body ?? {reason : "reason"};
     const user_id = req.user._id;
 
     const report = await Report.findOne({ _id: report_id });

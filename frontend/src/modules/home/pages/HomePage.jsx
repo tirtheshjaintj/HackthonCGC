@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import NavBar from "../../../components/navbar/NavBar";
 import HomeCard from "../../../components/HomeCard";
 import MultiplePointsMap from "../../../components/LeafletMap/MultiplePointsMap";
@@ -35,6 +35,8 @@ const sampleData = [
 ];
 
 export default function HomePage() {
+  const [reports, setReports] = useState([])
+  const [mapPoints, setMapPoints] = useState([])
   useEffect(() => {
     const fetchReports = async () => {
       try {
@@ -44,12 +46,48 @@ export default function HomePage() {
         }
 
         navigator.geolocation.getCurrentPosition(async (position) => {
-          const { latitude, longitude } = position.coords;
+          const { latitude, longitude  } = position.coords;
 
           const response = await axiosInstance.post("/report/nearby", {
             latitude,
             longitude,
           });
+          console.log({response})
+          const data = response.data.data;
+          const flatteneddata = data.map((report)=>{
+            return {
+              id: report._id,
+              description: report.description,
+              category: {
+                name: report.category_id?.name || "Uncategorized",
+              },
+              user_id: {
+                username: report.user_id?.username || "Unknown",
+              },
+              images: report.images?.map(img => img.image_url) || [],
+              status: report.status,
+              latitude: report.latitude,
+              longitude: report.longitude,
+              upvote_count: report.upvote_count,
+              flag_count: report.flag_count,
+              createdAt: report.createdAt,
+            };
+          })
+
+          const flatMapPoints = data.map((report)=>{
+            return {
+              id: report._id || index + 1, // fallback to index if _id not present
+              latitude: (report.latitude),
+              longitude:(report.longitude),
+              title: report.category?.name || "Untitled",
+              description: report.description || "No description provided"
+            }
+          })
+          setMapPoints(flatMapPoints)
+
+          console.log({flatMapPoints})
+
+          setReports(flatteneddata);
 
           console.log("Reports fetched:", response.data);
         }, (error) => {
@@ -70,10 +108,10 @@ export default function HomePage() {
         <span className="text-2xl font-bold text-[#272727] p-2  m-2  px-auto" >All Reports Locations</span>
       </div>
         <div className="w-full h-[80vh] mt-3 z-[-1] overflow-hidden" >
-          <MultiplePointsMap/>
+          <MultiplePointsMap data={mapPoints} />
         </div>
       <main className="px-4 py-6 md:px-20 md:py-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {sampleData.map((item, index) => (
+        {reports.map((item, index) => (
           <HomeCard key={index} item={item} />
         ))}
       </main>
