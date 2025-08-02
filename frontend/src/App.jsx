@@ -8,6 +8,6 @@ function App() {
       <Toaster position="bottom-right" />
     </>
   )
-}
+};
 
 export default App;

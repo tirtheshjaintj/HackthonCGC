@@ -94,6 +94,14 @@ export default function NavBar() {
               <LogIn size={20} strokeWidth={1.5} />
               <p className="font-semibold">Log In</p>
             </button>
+            <button className="flex items-center bg-dark-primary border rounded-2xl text-white px-4 py-1.5 cursor-pointer gap-2 hover:opacity-80">
+              <LogIn size={20} strokeWidth={1.5} />
+              <p className="font-semibold">Raise New Issue</p>
+            </button>
+            <button className="flex items-center bg-dark-primary border rounded-2xl text-white px-4 py-1.5 cursor-pointer gap-2 hover:opacity-80">
+              <LogIn size={20} strokeWidth={1.5} />
+              <p className="font-semibold">Log In</p>
+            </button>
           </div>
         )}
       </div>

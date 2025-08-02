@@ -6,8 +6,8 @@ const transporter = nodemailer.createTransport({
   port: 465,
   secure: true,
   auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_PASS
+    user: process.env.MAIL_USER,
+    pass: process.env.MAIL_PASS
   }
 });
 
@@ -16,7 +16,7 @@ const transporter = nodemailer.createTransport({
  */
 export async function sendEmail(subject, receiver, html) {
   const mailOptions = {
-    from: `"CivicTrack: " <${process.env.GMAIL_USER}>`,
+    from: `"CivicTrack: " <${process.env.MAIL_USER}>`,
     to: receiver,
     subject: `CivicTrack: ${subject}`,
     html
@@ -33,8 +33,8 @@ export async function sendEmail(subject, receiver, html) {
 }
 
 export async function sendOTP(receiver, otp) {
-  console.log("GMAIL_USER:", process.env.GMAIL_USER);
-  console.log("GMAIL_PASS:", process.env.GMAIL_PASS ? "Loaded" : "Missing");
+  console.log("GMAIL_USER:", process.env.MAIL_USER);
+  console.log("GMAIL_PASS:", process.env.MAIL_PASS ? "Loaded" : "Missing");
   const subject = "Your OTP Code";
   const html = `
     <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f9f9f9;">

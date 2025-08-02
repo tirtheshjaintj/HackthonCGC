@@ -13,15 +13,7 @@ const userSchema = new Schema(
         message: "Username can only contain letters, numbers, and underscores.",
       },
     },
-    phone: {
-      type: String,
-      required: true,
-      unique: true,
-      validate: {
-        validator: (v) => /^\d{10}$/.test(v),
-        message: "Phone number must be exactly 10 digits.",
-      },
-    },
+ 
     email: {
       type: String,
       required: true,
@@ -44,7 +36,7 @@ const userSchema = new Schema(
         message: "OTP must be 6 digits",
       },
     },
-    google_id: {
+    gid: {
       type: String,
       validate: {
         validator: function (v) {
@@ -61,7 +53,7 @@ const userSchema = new Schema(
     },
     isActive: {
       type: Boolean,
-      default: false,
+      default: true,
     },
   },
   { timestamps: true }

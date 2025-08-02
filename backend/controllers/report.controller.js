@@ -4,6 +4,9 @@ import Image from "../models/image.model.js";
 import Category from "../models/category.model.js";
 import userModel from "../models/user.model.js";
 import { AppError } from "../helpers/error.helper.js";
+import User from "../../../DhanRakshak/server/models/User.js";
+import { sendEmail } from "../helpers/mail.helper.js";
+import HistoryLogs from "../models/historylogs.model.js";
 import uploadToCloud from "../helpers/cloud.helper.js";
 import Upvote from "../models/upvote.model.js";
 import Flag from "../models/flag.model.js";
@@ -37,6 +40,8 @@ export const addCountsToReports = async (reports) => {
         flag_count: flagMap[report._id.toString()] || 0,
     }));
 };
+
+
 export const calculateDistanceKm = (lat1, lon1, lat2, lon2) => {
     const toRad = (val) => (val * Math.PI) / 180;
     const R = 6371; // Radius of Earth in KM
@@ -55,10 +60,33 @@ export const calculateDistanceKm = (lat1, lon1, lat2, lon2) => {
     return R * c; // Distance in KM
 };
 
-
 export const createReport = expressAsyncHandler(async (req, res) => {
-    const { description, anonymous = false, latitude, longitude, category_id } = req.body;
-    const userId = req.user?._id; // adapt for auth
+    const {
+        description,
+        anonymous = false,
+        latitude,
+        longitude,
+        category_id,
+    } = req.body;
+    const userId = req.user?._id || req.body.user_id; // adapt for auth
+
+    // Ensure at least 1 image and max 10
+    // if (!req.files || req.files.length === 0) {
+    //     return res.status(400).json({ status: false, message: "At least one image is required" });
+    // }
+
+    // if (req.files.length > 10) {
+    //     return res.status(400).json({ status: false, message: "Maximum 10 images allowed" });
+    // }
+
+    // Create image documents
+    // const imageDocs = await Promise.all(
+    //     req.files.map(async (file) => {
+    //         return await Image.create({
+    //             report_id: null, // will link after report is created
+    //             image_url: file.path, // or file.location if using S3
+    //         });
+    //     })
 
     // Ensure at least 1 image and max 10
     if (!req.files || req.files.length === 0) {
@@ -90,6 +118,10 @@ export const createReport = expressAsyncHandler(async (req, res) => {
         // images: imageDocs.map((img) => img._id),
     });
 
+    const user = userModel.findById(userId);
+    if (!user) {
+        throw new AppError("User not found", 404);
+    }
     // Update images with report_id reference
     await Promise.all(
         imageDocs.map((img) => {
@@ -98,12 +130,40 @@ export const createReport = expressAsyncHandler(async (req, res) => {
         })
     );
 
+    const history = await HistoryLogs.create({
+        report_id: report._id,
+        action: `Report created by ${user.name}`,
+    })
+
+    await sendEmail(
+        "New Report Created",
+        user.email,
+        `Hello ${user.name || ""},
+
+A new report has been successfully submitted on CivicTrack.
+
+Report Details:
+"${report.description}"
+
+Thank you for helping us keep our community informed.
+
+- CivicTrack Team`
+    );
+    // Update images with report_id reference
+    // await Promise.all(
+    //     imageDocs.map((img) => {
+    //         img.report_id = report._id;
+    //         return img.save();
+    //     })
+    // );
+
     res.status(201).json({
         status: true,
         message: "Report created successfully",
         data: report,
     });
 });
+
 
 export const getReportById = expressAsyncHandler(async (req, res) => {
     const { reportId } = req.params;
@@ -197,13 +257,11 @@ export const myReports = expressAsyncHandler(async (req, res) => {
     res.status(200).json({ status: true, count: reports.length, data: reportsWithCounts });
 });
 
-
 export const allReports = expressAsyncHandler(async (req, res) => {
     const reports = await Report.find().populate("images").populate("category_id").populate("user_id").sort({ createdAt: -1 });
     const reportsWithCounts = await addCountsToReports(reports);
     res.status(200).json({ status: true, count: reports.length, data: reportsWithCounts });
 });
-
 
 export const changeStatus = expressAsyncHandler(async (req, res) => {
     const { reportId } = req.params;
@@ -215,11 +273,7 @@ export const changeStatus = expressAsyncHandler(async (req, res) => {
     }
     report.status = status;
     await report.save();
-    const reportsWithCounts = await addCountsToReports([report]);
-    res.status(200).json({ status: true, message: "Status updated successfully", data: reportsWithCounts[0] });
+
+    res.status(200).json({ status: true, message: "Status updated successfully", data: report });
 });
 
-export const getCategories = expressAsyncHandler(async (req, res) => {
-    const categories = await Category.find({ active: true });
-    res.json({ status: true, message: "Status updated successfully", data: categories });
-});

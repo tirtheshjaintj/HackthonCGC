@@ -18,7 +18,7 @@ export default function HomeCard({ value }) {
       rounded-2xl border-gray-300 dark:border-stone-900 max-lg:min-w-[280px] lg:min-w-sm overflow-clip font-quicksand"
     >
       <img
-        src={value?.images ?? "/"}
+        src={value?.images ?? "https://thumbs.dreamstime.com/b/beautiful-sun-rising-sky-asphalt-highways-road-rural-sce-scene-use-land-transport-traveling-background-backdrop-52532841.jpg"}
         alt="profile"
         className="aspect-[16/9] object-cover w-full"
         width={300}
