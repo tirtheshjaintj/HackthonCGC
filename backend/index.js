@@ -5,20 +5,22 @@ import connectDB from "./helpers/db.helper.js";
 import { errorHandler } from "./helpers/error.helper.js";
 import "dotenv/config";
 const allowedOrigins = [
-    "http://localhost:5173",
+    "*",
     process.env.FRONTEND_URL
 ];
 const app = express();
+
 const corsOptions = {
-    origin: (origin, cb) => {
-        if (!origin && allowedOrigins.includes(origin)) {
-            cb(null, true);
-        } else {
-            cb(new Error("Not allowed by CORS"));
-        }
-    },
-    credentials: true
+  origin: (origin, cb) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      cb(null, true); 
+    } else {
+      cb(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true
 };
+
 app.use(cors(corsOptions));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -28,6 +30,12 @@ connectDB();
 //Error Handling Using Express-AsyncHandler
 app.use(errorHandler);
 const port = process.env.PORT;
+
+
+import userRouter from "./routes/user.routes.js"
+app.use('/user',userRouter);
+
+
 
 app.get("/", (req, res) => {
     return res.send("Working Fine");
