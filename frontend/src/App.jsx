@@ -10,6 +10,9 @@ import { useEffect } from "react";
 import { getCookie, removeCookie } from "./axios/cookieFunc";
 import axiosInstance from "./axios/axiosConfig";
 import useAuthStore from "./store/authSlice/authSlice";
+import HomePage from "./modules/home/pages/HomePage";
+import ReportDetails from "./modules/ReportDetails/ReportDetails";
+import { Toaster } from "react-hot-toast";
 // import other components like Login, Home, etc. when available
 
 const routes = [
