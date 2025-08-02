@@ -216,7 +216,7 @@ export const editReport = expressAsyncHandler(async (req, res) => {
 
 
 export const getReports = expressAsyncHandler(async (req, res) => {
-    const { latitude, longitude, distance = 50 } = req.body;
+    const { latitude, longitude, distance } = req.body;
     const validDistance = [1, 3, 5 , 50];
     if (!validDistance.includes(distance)) throw new AppError("Not Valid Distance", 401);
     const reports = await Report.find({ hidden: false }).populate("images").populate("category_id").populate("user_id");
