@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import axiosInstance from '../../axios/axiosConfig';
 import GoogleBox from '../../components/GoogleBox/GoogleBox';
 import { FaSpinner } from 'react-icons/fa';
+import { setCookie } from '../../axios/cookieFunc';
 const Login = () => {
   const [formData, setFormData] = useState({
     username: '',
@@ -23,6 +24,7 @@ const Login = () => {
       const response = await axiosInstance.post('/user/login', formData);
       if (response.data) {
         toast.success('Login successful!');
+        setCookie('token' , response.token)
         navigate('/dashboard'); // change to your target page
       } else {
         toast.error(response.data.message || 'Login failed');

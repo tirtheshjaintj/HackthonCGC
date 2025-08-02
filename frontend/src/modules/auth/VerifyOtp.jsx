@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import axiosInstance from '../../axios/axiosConfig';
-import { useLocation } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 
 const VerifyOtp = () => {
   const [otp, setOtp] = useState(new Array(6).fill(''));
@@ -48,8 +48,7 @@ const VerifyOtp = () => {
           email,
           otp: enteredOtp,
         });
-        console.log(response.data);
-        // You can redirect or show success here
+        Navigate('/login')
       } catch (error) {
         console.error(error);
         // Handle error

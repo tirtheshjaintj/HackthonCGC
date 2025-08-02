@@ -25,6 +25,6 @@ userRouter.post("/login", login);
 // Google Sign-In
 userRouter.post("/google-signin", googleSignIn);
 
-userRouter.get('/all', getAllUsers)
+userRouter.get('/all' , getAllUsers)
 
 export default userRouter;
