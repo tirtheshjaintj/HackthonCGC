@@ -1,5 +1,6 @@
 import { AppError } from "../helpers/error.helper.js";
 import { getUser } from "../helpers/jwt.helper.js";
+import adminModel from "../models/admin.model.js";
 import UserModel from "../models/user.model.js";
 
 export const authcheck = async (req, res, next) => {
@@ -55,7 +56,7 @@ export const authcheckAdmin = async (req, res, next) => {
     const user = getUser(token);
     if (!user) throw new AppError("Not Authorized", 401);
 
-    const verified_user = await UserModel.findOne({ _id: user._id, isActive: true }).lean();
+    const verified_user = await adminModel.findOne({ _id: user._id, isActive: true }).lean();
     if (!verified_user) throw new AppError("Not Authorized", 401);
 
     verified_user.password = "HIDDEN"; // Hide password

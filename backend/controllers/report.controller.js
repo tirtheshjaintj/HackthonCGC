@@ -5,8 +5,38 @@ import Category from "../models/category.model.js";
 import userModel from "../models/user.model.js";
 import { AppError } from "../helpers/error.helper.js";
 import uploadToCloud from "../helpers/cloud.helper.js";
+import Upvote from "../models/upvote.model.js";
+import Flag from "../models/flag.model.js";
 
-// utils/distance.js
+export const addCountsToReports = async (reports) => {
+    // Convert to plain objects to allow new properties
+    const plainReports = reports.map((r) => r.toObject());
+
+    // Get counts for all reports in bulk
+    const reportIds = plainReports.map((r) => r._id);
+
+    const [upvoteCounts, flagCounts] = await Promise.all([
+        Upvote.aggregate([
+            { $match: { report_id: { $in: reportIds } } },
+            { $group: { _id: "$report_id", count: { $sum: 1 } } },
+        ]),
+        Flag.aggregate([
+            { $match: { report_id: { $in: reportIds } } },
+            { $group: { _id: "$report_id", count: { $sum: 1 } } },
+        ]),
+    ]);
+
+    // Convert to maps for fast lookup
+    const upvoteMap = Object.fromEntries(upvoteCounts.map((u) => [u._id.toString(), u.count]));
+    const flagMap = Object.fromEntries(flagCounts.map((f) => [f._id.toString(), f.count]));
+
+    // Attach counts to each report
+    return plainReports.map((report) => ({
+        ...report,
+        upvote_count: upvoteMap[report._id.toString()] || 0,
+        flag_count: flagMap[report._id.toString()] || 0,
+    }));
+};
 export const calculateDistanceKm = (lat1, lon1, lat2, lon2) => {
     const toRad = (val) => (val * Math.PI) / 180;
     const R = 6371; // Radius of Earth in KM
@@ -79,10 +109,11 @@ export const getReportById = expressAsyncHandler(async (req, res) => {
     const { reportId } = req.params;
     const report = await Report.findById(reportId).populate("images").populate("category_id").populate("user_id");
     if (!report) throw new AppError("Report not found", 404);
+    const reportsWithCounts = await addCountsToReports([report]);
     res.status(201).json({
         status: true,
         message: "Report Fetched",
-        data: report,
+        data: reportsWithCounts[0],
     });
 });
 
@@ -152,8 +183,8 @@ export const getReports = expressAsyncHandler(async (req, res) => {
         const d = calculateDistanceKm(latitude, longitude, report.latitude, report.longitude);
         return d <= distance;
     });
-
-    res.status(200).json({ status: true, count: filteredReports.length, data: filteredReports });
+    const reportsWithCounts = await addCountsToReports(filteredReports);
+    res.status(200).json({ status: true, count: filteredReports.length, data: reportsWithCounts });
 });
 
 export const myReports = expressAsyncHandler(async (req, res) => {
@@ -162,13 +193,15 @@ export const myReports = expressAsyncHandler(async (req, res) => {
         .populate("images")
         .populate("category_id")
         .sort({ createdAt: -1 });
-    res.status(200).json({ status: true, count: reports.length, data: reports });
+    const reportsWithCounts = await addCountsToReports(reports);
+    res.status(200).json({ status: true, count: reports.length, data: reportsWithCounts });
 });
 
 
 export const allReports = expressAsyncHandler(async (req, res) => {
     const reports = await Report.find().populate("images").populate("category_id").populate("user_id").sort({ createdAt: -1 });
-    res.status(200).json({ status: true, count: reports.length, data: reports });
+    const reportsWithCounts = await addCountsToReports(reports);
+    res.status(200).json({ status: true, count: reports.length, data: reportsWithCounts });
 });
 
 
