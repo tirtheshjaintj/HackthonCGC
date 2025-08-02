@@ -25,7 +25,7 @@ export default function NavBar() {
 
   return (
     <header
-      className={`h-16 py-4 px-4 xl:px-[90px] lg:px-15 md:px-10 flex items-center justify-between sticky top-0 z-50 w-full transition-shadow duration-300 ${
+      className={`h-16  py-4 px-4 xl:px-[90px] lg:px-15 md:px-10 flex items-center justify-between sticky top-0 z-50 w-full transition-shadow duration-300 ${
         isScrolled
           ? "shadow-md bg-white/40 backdrop-blur-xl"
           : "bg-white shadow"
