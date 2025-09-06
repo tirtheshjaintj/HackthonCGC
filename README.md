@@ -26,17 +26,3 @@ It empowers people to **reduce waste, promote circular economy, and save money**
 - **Hosting**: Vercel / Netlify (frontend), Render / Heroku (backend)  
 
 ---
-
-## 📦 Installation & Setup  
-
-Clone the repo and install dependencies:  
-
-```bash
-# Clone repository
-git clone https://github.com/your-username/ecofinds.git
-
-# Navigate to project
-cd ecofinds
-
-# Install dependencies
-npm install
